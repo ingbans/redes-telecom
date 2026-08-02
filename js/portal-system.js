@@ -163,10 +163,19 @@ const TEACHER_EMAIL = "bryann25067@gmail.com";
 /* ==========================================================================
    GOOGLE AUTHENTICATION & SESSION MANAGEMENT
    ========================================================================== */
-function handleGoogleSignIn() {
-    if (!auth) {
-        alert("El servicio de Google Firebase no se ha inicializado correctamente. Verifica tu conexión a internet.");
+function handleGoogleSignIn(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+        alert("El SDK de Firebase no se ha cargado. Verifica tu conexión a internet.");
         return;
+    }
+
+    if (!auth) {
+        auth = firebase.auth();
     }
 
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -174,18 +183,22 @@ function handleGoogleSignIn() {
 
     auth.signInWithPopup(provider)
         .then((result) => {
-            processAuthenticatedGoogleUser(result.user);
+            if (result && result.user) {
+                processAuthenticatedGoogleUser(result.user);
+            }
         })
         .catch((error) => {
-            console.error("Error Google Auth Popup:", error);
+            console.error("Error al iniciar sesión con Google:", error);
             
-            if (error.code === 'auth/unauthorized-domain') {
-                alert(`⚠️ ATENCIÓN PROFESOR:\nPara habilitar el inicio de sesión con Google en GitHub Pages, debes ir a tu consola de Firebase:\n\n1. Ve a Authentication > Configuración (Settings)\n2. En "Dominios autorizados", agrega: ingbans.github.io`);
-            } else if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
-                // Fallback to redirect
+            if (error.code === 'auth/operation-not-allowed') {
+                alert(`⚠️ CONFIGURACIÓN PENDIENTE EN FIREBASE:\nDebes habilitar Google en tu consola de Firebase:\n\n1. Ve a console.firebase.google.com\n2. Entra a Authentication > Métodos de inicio de sesión\n3. Haz clic en "Google" -> Habilitar -> Guardar.`);
+            } else if (error.code === 'auth/unauthorized-domain') {
+                alert(`⚠️ DOMINIO PENDIENTE EN FIREBASE:\nPara permitir el inicio de sesión desde GitHub Pages, debes agregar tu dominio en Firebase:\n\n1. Ve a Authentication > Configuración (Settings)\n2. En "Dominios autorizados", haz clic en Agregar Dominio\n3. Escribe: ingbans.github.io`);
+            } else if (error.code === 'auth/popup-blocked') {
+                alert("El navegador bloqueó la ventana emergente de Google. Intentando redirección...");
                 auth.signInWithRedirect(provider);
-            } else {
-                alert(`Mensaje de Firebase: ${error.message}`);
+            } else if (error.code !== 'auth/popup-closed-by-user') {
+                alert(`Error (${error.code || 'Desconocido'}): ${error.message}`);
             }
         });
 }
