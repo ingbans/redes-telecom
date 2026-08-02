@@ -172,6 +172,96 @@ function initPortalModals() {
             }
         });
     }
+
+    // Full Page Login Form
+    const pageLoginForm = document.getElementById('page-login-form');
+    if (pageLoginForm) {
+        pageLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const role = document.querySelector('input[name="page-login-role"]:checked').value;
+
+            if (role === 'teacher') {
+                const pinInput = document.getElementById('page-login-teacher-pin').value;
+                const savedPin = localStorage.getItem(PORTAL_KEYS.TEACHER_PIN) || DEFAULT_TEACHER_PIN;
+
+                if (pinInput === savedPin) {
+                    currentSession = { role: 'teacher', user: { name: 'Profesor de Telecomunicaciones' } };
+                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+                    renderAuthUI();
+                    window.location.hash = '#portal-teacher';
+                } else {
+                    alert('Clave de Profesor/Administrador incorrecta.');
+                }
+            } else {
+                const email = document.getElementById('page-login-email').value.trim().toLowerCase();
+                const password = document.getElementById('page-login-password').value;
+
+                const student = registeredStudents.find(s => s.email === email && s.password === password);
+                if (student) {
+                    currentSession = { role: 'student', user: student };
+                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+                    renderAuthUI();
+                    window.location.hash = '#portal-student';
+                } else {
+                    alert('Correo o contraseña de estudiante incorrecta.');
+                }
+            }
+        });
+    }
+
+    // Full Page Register Form
+    const pageRegisterForm = document.getElementById('page-register-form');
+    if (pageRegisterForm) {
+        pageRegisterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('page-reg-name').value.trim();
+            const email = document.getElementById('page-reg-email').value.trim().toLowerCase();
+            const idNumber = document.getElementById('page-reg-id').value.trim();
+            const password = document.getElementById('page-reg-password').value;
+
+            if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
+                alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
+                return;
+            }
+
+            const newStudent = {
+                id: 'std_' + Date.now(),
+                name,
+                email,
+                idNumber,
+                password
+            };
+
+            registeredStudents.push(newStudent);
+            localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+            currentSession = { role: 'student', user: newStudent };
+            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+
+            renderAuthUI();
+            alert(`¡Registro exitoso! Bienvenido ${name}.`);
+            window.location.hash = '#portal-student';
+        });
+    }
+}
+
+function switchPageAuthMode(mode) {
+    const loginForm = document.getElementById('page-login-form');
+    const regForm = document.getElementById('page-register-form');
+    const tabLogin = document.getElementById('page-tab-login');
+    const tabReg = document.getElementById('page-tab-register');
+
+    if (mode === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.className = 'btn btn-primary';
+        tabReg.className = 'btn btn-outline';
+    } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabLogin.className = 'btn btn-outline';
+        tabReg.className = 'btn btn-primary';
+    }
 }
 
 function openLoginModal() {

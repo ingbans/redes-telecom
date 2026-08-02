@@ -202,6 +202,7 @@ function handleHashChange() {
 
 function getToolTitle(toolName) {
     switch (toolName) {
+        case 'login': return 'Acceso al Portal / Inicio de Sesión';
         case 'subnet': return 'Calculadora Subnetting';
         case 'cli': return 'Cheatsheet Cisco CLI';
         case 'quiz': return 'Simulador de Quizzes';
