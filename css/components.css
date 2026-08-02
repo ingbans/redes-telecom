@@ -1016,4 +1016,103 @@
     to { stroke-dashoffset: 0; }
 }
 
+/* OSI Simulator Layer Boxes */
+.osi-layer-box {
+    padding: 0.6rem 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+.osi-layer-box.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+    transform: translateY(-2px);
+}
+.osi-layer-box.success {
+    background-color: rgba(14, 165, 233, 0.15);
+}
+
+.pdu-block {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+.data-block { background-color: #0ea5e9; color: #fff; }
+.header-block.l4 { background-color: #a855f7; color: #fff; }
+.header-block.l3 { background-color: #ec4899; color: #fff; }
+.header-block.l2 { background-color: #f59e0b; color: #fff; }
+.trailer-block { background-color: #ef4444; color: #fff; }
+.bits-block { background-color: var(--bg-tertiary); color: var(--accent); font-family: monospace; }
+
+/* Medium Wave Canvas */
+.medium-wave-canvas {
+    padding: 1.25rem;
+    border-radius: 10px;
+    background-color: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+.wave-utp { color: #f59e0b; border-color: #f59e0b; }
+.wave-fiber { color: #0ea5e9; border-color: #0ea5e9; }
+.wave-wifi { color: #a855f7; border-color: #a855f7; }
+
+/* Subnet Visual Blocks */
+.subnet-blocks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+.subnet-visual-block {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+}
+.subnet-visual-block strong { color: var(--primary); font-size: 0.85rem; }
+.subnet-visual-block span { font-family: monospace; color: var(--text-primary); margin: 0.2rem 0; }
+.subnet-visual-block small { color: var(--text-muted); }
+
+/* Diagnostic Quiz Options */
+.diag-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+}
+.diag-opt-btn {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+.diag-opt-btn:hover { border-color: var(--primary); }
+.diag-opt-btn.selected-correct { background-color: rgba(16, 185, 129, 0.2); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.diag-opt-btn.selected-wrong { background-color: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); font-weight: 700; }
+.diag-exp-box { font-size: 0.85rem; margin-top: 0.5rem; }
+.exp-success { color: var(--accent); }
+.exp-danger { color: var(--danger); }
+
+
 

@@ -257,8 +257,12 @@ function renderTopicView(topicId) {
         nextBtn.style.visibility = 'hidden';
     }
 
-    // Auto-initialize VLAN simulation if Clase 5
-    if (topic.id === 'clase-5') {
+    // Auto-initialize class specific animations
+    if (topic.id === 'clase-1') {
+        resetOSISimulation();
+    } else if (topic.id === 'clase-3') {
+        setTimeout(updateSubnetVisualizer, 100);
+    } else if (topic.id === 'clase-5') {
         setTimeout(() => {
             drawVLANCables();
             runVLANSimulation('same-vlan');
