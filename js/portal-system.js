@@ -219,8 +219,16 @@ function processAuthenticatedGoogleUser(user) {
 
     // Check Whitelist Security for Students
     if (!isEmailWhitelisted(email)) {
-        alert(`🛑 ACCESO DENEGADO: Tu correo de Google (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
-        auth.signOut();
+        // Delete the Firebase Auth account immediately to prevent unauthorized user accumulation
+        user.delete()
+            .then(() => {
+                console.warn(`Usuario no autorizado eliminado de Firebase Auth: ${email}`);
+            })
+            .catch(() => {
+                // If delete fails (e.g. token expired), sign out as fallback
+                auth.signOut();
+            });
+        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no está en la Lista Blanca de alumnos autorizados para este curso.\n\nTu cuenta ha sido eliminada del sistema. Contacta al profesor para solicitar acceso.`);
         return;
     }
 
