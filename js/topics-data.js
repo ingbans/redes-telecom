@@ -170,7 +170,15 @@ const courseTopicsData = [
                 </div>
 
                 <!-- Graphical Topology Canvas -->
-                <div class="vlan-topology-stage">
+                <div class="vlan-topology-stage" id="vlan-stage">
+                    <!-- SVG Cables Layer -->
+                    <svg class="vlan-cables-svg" id="vlan-cables-svg">
+                        <line id="cable-r1-sw1" class="vlan-cable trunk-cable" />
+                        <line id="cable-sw1-pc1" class="vlan-cable access-cable-10" />
+                        <line id="cable-sw1-pc2" class="vlan-cable access-cable-10" />
+                        <line id="cable-sw1-pc3" class="vlan-cable access-cable-20" />
+                        <line id="cable-sw1-pc4" class="vlan-cable access-cable-20" />
+                    </svg>
                     <div class="vlan-device router-device" id="device-router">
                         <i class="fa-solid fa-route device-icon"></i>
                         <span class="device-name">Router (R1)</span>

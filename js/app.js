@@ -249,6 +249,14 @@ function renderTopicView(topicId) {
         nextBtn.style.visibility = 'hidden';
     }
 
+    // Auto-initialize VLAN simulation if Clase 5
+    if (topic.id === 'clase-5') {
+        setTimeout(() => {
+            drawVLANCables();
+            runVLANSimulation('same-vlan');
+        }, 150);
+    }
+
     // Scroll to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -725,3 +733,47 @@ function positionPacketAtDevice(packetEl, deviceEl) {
     packetEl.style.top = `${topOffset}px`;
     packetEl.style.left = `${leftOffset}px`;
 }
+
+function drawVLANCables() {
+    const stage = document.getElementById('vlan-stage');
+    if (!stage) return;
+
+    const router = document.getElementById('device-router');
+    const switchDev = document.getElementById('device-switch');
+    const pc1 = document.getElementById('device-pc1');
+    const pc2 = document.getElementById('device-pc2');
+    const pc3 = document.getElementById('device-pc3');
+    const pc4 = document.getElementById('device-pc4');
+
+    if (!router || !switchDev || !pc1 || !pc2 || !pc3 || !pc4) return;
+
+    const connect = (lineId, el1, el2) => {
+        const line = document.getElementById(lineId);
+        if (!line) return;
+        const stageRect = stage.getBoundingClientRect();
+        const r1 = el1.getBoundingClientRect();
+        const r2 = el2.getBoundingClientRect();
+
+        const x1 = (r1.left - stageRect.left) + r1.width / 2;
+        const y1 = (r1.top - stageRect.top) + r1.height / 2;
+        const x2 = (r2.left - stageRect.left) + r2.width / 2;
+        const y2 = (r2.top - stageRect.top) + r2.height / 2;
+
+        line.setAttribute('x1', x1);
+        line.setAttribute('y1', y1);
+        line.setAttribute('x2', x2);
+        line.setAttribute('y2', y2);
+    };
+
+    connect('cable-r1-sw1', router, switchDev);
+    connect('cable-sw1-pc1', switchDev, pc1);
+    connect('cable-sw1-pc2', switchDev, pc2);
+    connect('cable-sw1-pc3', switchDev, pc3);
+    connect('cable-sw1-pc4', switchDev, pc4);
+}
+
+window.addEventListener('resize', () => {
+    if (currentTopicId === 'clase-5') {
+        drawVLANCables();
+    }
+});
