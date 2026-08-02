@@ -676,7 +676,13 @@ function renderGradesTab() {
     }
 
     registeredStudents.forEach(std => {
-        const stdGrades = gradesRecords[std.id] || { ex1: '', ex2: '', ex3: '', lab: '' };
+        const rawGrades = gradesRecords[std.id] || {};
+        const stdGrades = {
+            ex1: rawGrades.ex1 !== undefined ? rawGrades.ex1 : '',
+            ex2: rawGrades.ex2 !== undefined ? rawGrades.ex2 : '',
+            ex3: rawGrades.ex3 !== undefined ? rawGrades.ex3 : '',
+            lab: rawGrades.lab !== undefined ? rawGrades.lab : ''
+        };
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -765,16 +771,16 @@ function renderRosterTab() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
+    if (registeredStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
+        return;
+    }
     registeredStudents.forEach(std => {
-        const stdQuizLogs = quizAttemptsRecords[std.id] || [];
-        const quizCount = stdQuizLogs.length;
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${std.name}</strong></td>
             <td>${std.email}</td>
             <td><code>${std.idNumber}</code></td>
-            <td><span class="status-pill status-present"><i class="fa-solid fa-vial"></i> ${quizCount} Prácticas</span></td>
             <td>
                 <button class="btn btn-secondary btn-sm" onclick="deleteStudent('${std.id}')">
                     <i class="fa-solid fa-trash"></i> Eliminar
