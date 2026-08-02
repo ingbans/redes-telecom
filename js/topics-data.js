@@ -143,10 +143,96 @@ const courseTopicsData = [
         description: "Segmentación lógica en switches, etiquetado 802.1Q, VLAN nativa y enrutamiento Router-on-a-Stick.",
         content: `
             <h2><i class="fa-solid fa-diagram-project"></i> Objetivos Teóricos de la Clase 5</h2>
-            <p>Comprender el aislamiento de dominios de broadcast mediante VLANs y la inclusión del tag 802.1Q en enlaces troncales.</p>
+            <p>Comprender el aislamiento de dominios de broadcast mediante VLANs, la inclusión del tag IEEE 802.1Q en enlaces troncales y el enrutamiento Inter-VLAN (Router-on-a-Stick).</p>
+
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Operación de VLANs y Tag 802.1Q</h2>
+            <p>Utiliza los botones a continuación para observar cómo el switch aísla el tráfico entre VLANs y cómo el Router interconecta ambas VLANs en Capa 3:</p>
+
+            <div class="vlan-simulator-container">
+                <div class="vlan-controls">
+                    <button class="btn btn-outline btn-sm active" onclick="runVLANSimulation('same-vlan')">
+                        <i class="fa-solid fa-bullhorn"></i> 1. Broadcast en Misma VLAN (VLAN 10)
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="runVLANSimulation('cross-vlan-block')">
+                        <i class="fa-solid fa-ban"></i> 2. Bloqueo Capa 2 (VLAN 10 ➔ VLAN 20)
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="runVLANSimulation('router-on-stick')">
+                        <i class="fa-solid fa-route"></i> 3. Inter-VLAN Routing (802.1Q Trunk)
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="resetVLANSimulation()">
+                        <i class="fa-solid fa-rotate-left"></i> Reiniciar
+                    </button>
+                </div>
+
+                <!-- Status Box -->
+                <div class="vlan-status-banner" id="vlan-status-text">
+                    <i class="fa-solid fa-circle-info"></i> Selecciona un escenario arriba para iniciar la animación interactiva.
+                </div>
+
+                <!-- Graphical Topology Canvas -->
+                <div class="vlan-topology-stage">
+                    <div class="vlan-device router-device" id="device-router">
+                        <i class="fa-solid fa-route device-icon"></i>
+                        <span class="device-name">Router (R1)</span>
+                        <span class="device-subnet">Subinterfaces .10 y .20</span>
+                    </div>
+
+                    <div class="vlan-device switch-device" id="device-switch">
+                        <i class="fa-solid fa-network-wired device-icon"></i>
+                        <span class="device-name">Switch (SW1)</span>
+                        <span class="device-subnet">Tabla de MACs & VLANs</span>
+                    </div>
+
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="device-pc1">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-1 (Ventas)</span>
+                            <span class="vlan-tag-pill vlan10-pill">VLAN 10</span>
+                            <span class="device-ip">192.168.10.10</span>
+                        </div>
+
+                        <div class="vlan-device pc-device vlan10-pc" id="device-pc2">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-2 (Ventas)</span>
+                            <span class="vlan-tag-pill vlan10-pill">VLAN 10</span>
+                            <span class="device-ip">192.168.10.11</span>
+                        </div>
+
+                        <div class="vlan-device pc-device vlan20-pc" id="device-pc3">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-3 (Finanzas)</span>
+                            <span class="vlan-tag-pill vlan20-pill">VLAN 20</span>
+                            <span class="device-ip">192.168.20.10</span>
+                        </div>
+
+                        <div class="vlan-device pc-device vlan20-pc" id="device-pc4">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-4 (Finanzas)</span>
+                            <span class="vlan-tag-pill vlan20-pill">VLAN 20</span>
+                            <span class="device-ip">192.168.20.11</span>
+                        </div>
+                    </div>
+
+                    <!-- Animated Data Packet Dot -->
+                    <div class="vlan-packet hidden" id="vlan-packet">
+                        <span class="packet-tag" id="packet-tag-label">VID:10</span>
+                    </div>
+                </div>
+
+                <!-- Packet Inspector Panel -->
+                <div class="vlan-packet-inspector" id="vlan-inspector">
+                    <h4><i class="fa-solid fa-magnifying-glass"></i> Inspección de Encabezado Ethernet (802.1Q Tag)</h4>
+                    <div class="frame-structure">
+                        <span class="frame-field">Destino: FF:FF:FF:FF:FF:FF</span>
+                        <span class="frame-field">Origen: MAC-PC1</span>
+                        <span class="frame-field tag-field" id="inspector-tag-field">IEEE 802.1Q (Sin Etiqueta / Access)</span>
+                        <span class="frame-field">Datos IP: 192.168.10.0/24</span>
+                    </div>
+                </div>
+            </div>
 
             <h2><i class="fa-solid fa-link"></i> Enlaces Troncales y Etiquetado IEEE 802.1Q</h2>
-            <p>Un enlace troncal (Trunk) transporta tráfico de múltiples VLANs a través de un único enlace físico. El protocolo estándar <strong>IEEE 802.1Q</strong> inserta un campo de encabezado de 4 bytes en la trama Ethernet que incluye el <strong>VLAN ID (VID)</strong>.</p>
+            <p>Un enlace troncal (Trunk) transporta tráfico de múltiples VLANs a través de un único enlace físico. El protocolo estándar <strong>IEEE 802.1Q</strong> inserta un campo de encabezado de 4 bytes en la trama Ethernet que incluye el <strong>VLAN ID (VID)</strong> de 12 bits (permitiendo hasta 4,096 VLANs).</p>
         `
     },
     {

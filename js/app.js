@@ -561,3 +561,167 @@ function initSidebarToggle() {
         overlay.addEventListener('click', closeSidebar);
     }
 }
+
+/* ==========================================================================
+   VLAN INTERACTIVE ANIMATION CONTROLLER
+   ========================================================================== */
+let vlanAnimTimeout = null;
+
+function resetVLANSimulation() {
+    if (vlanAnimTimeout) clearTimeout(vlanAnimTimeout);
+
+    const statusEl = document.getElementById('vlan-status-text');
+    if (statusEl) {
+        statusEl.innerHTML = `<i class="fa-solid fa-circle-info"></i> Selecciona un escenario arriba para iniciar la animación interactiva.`;
+        statusEl.style.borderLeftColor = 'var(--primary)';
+    }
+
+    document.querySelectorAll('.vlan-device').forEach(d => {
+        d.className = d.className.replace(/highlight-\w+/g, '').trim();
+    });
+
+    const packet = document.getElementById('vlan-packet');
+    if (packet) {
+        packet.classList.add('hidden');
+        packet.style.transform = 'none';
+        packet.style.top = 'auto';
+        packet.style.left = 'auto';
+    }
+
+    const tagField = document.getElementById('inspector-tag-field');
+    if (tagField) {
+        tagField.textContent = 'IEEE 802.1Q (Sin Etiqueta / Access)';
+        tagField.style.backgroundColor = 'var(--bg-tertiary)';
+        tagField.style.color = 'var(--text-secondary)';
+    }
+}
+
+function runVLANSimulation(mode) {
+    resetVLANSimulation();
+
+    document.querySelectorAll('.vlan-controls .btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(mode)) {
+            btn.classList.add('active');
+        }
+    });
+
+    const statusEl = document.getElementById('vlan-status-text');
+    const packet = document.getElementById('vlan-packet');
+    const tagLabel = document.getElementById('packet-tag-label');
+    const tagField = document.getElementById('inspector-tag-field');
+
+    const pc1 = document.getElementById('device-pc1');
+    const pc2 = document.getElementById('device-pc2');
+    const pc3 = document.getElementById('device-pc3');
+    const pc4 = document.getElementById('device-pc4');
+    const switchDev = document.getElementById('device-switch');
+    const routerDev = document.getElementById('device-router');
+
+    if (!pc1 || !switchDev) return;
+
+    if (mode === 'same-vlan') {
+        statusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <strong>Escenario 1:</strong> PC-1 emite un Broadcast ARP en <strong>VLAN 10</strong>...`;
+        pc1.classList.add('highlight-active');
+
+        positionPacketAtDevice(packet, pc1);
+        packet.classList.remove('hidden');
+        tagLabel.textContent = 'VLAN10';
+
+        vlanAnimTimeout = setTimeout(() => {
+            statusEl.innerHTML = `<i class="fa-solid fa-bolt"></i> Switch evalúa tabla de VLANs: Puerto asignado a <strong>Access VLAN 10</strong>.`;
+            positionPacketAtDevice(packet, switchDev);
+            switchDev.classList.add('highlight-active');
+
+            tagField.textContent = 'IEEE 802.1Q (VLAN 10 Tagged)';
+            tagField.style.backgroundColor = 'rgba(14, 165, 233, 0.2)';
+            tagField.style.color = '#0ea5e9';
+
+            vlanAnimTimeout = setTimeout(() => {
+                positionPacketAtDevice(packet, pc2);
+                pc2.classList.add('highlight-success');
+                if (pc3) pc3.classList.add('highlight-blocked');
+                if (pc4) pc4.classList.add('highlight-blocked');
+
+                statusEl.innerHTML = `✅ <strong>Resultado:</strong> Paquete entregado únicamente a <strong>PC-2 (VLAN 10)</strong>. PC-3 y PC-4 (VLAN 20) quedan totalmente aisladas de la inundación de broadcast.`;
+            }, 1200);
+        }, 1200);
+
+    } else if (mode === 'cross-vlan-block') {
+        statusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <strong>Escenario 2:</strong> PC-1 (VLAN 10) intenta enviar un paquete directo a PC-3 (VLAN 20)...`;
+        pc1.classList.add('highlight-active');
+
+        positionPacketAtDevice(packet, pc1);
+        packet.classList.remove('hidden');
+        tagLabel.textContent = 'VLAN10';
+
+        vlanAnimTimeout = setTimeout(() => {
+            statusEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Switch verifica VLAN ID del puerto de salida...`;
+            positionPacketAtDevice(packet, switchDev);
+            switchDev.classList.add('highlight-blocked');
+
+            vlanAnimTimeout = setTimeout(() => {
+                packet.classList.add('hidden');
+                if (pc3) pc3.classList.add('highlight-blocked');
+
+                statusEl.innerHTML = `⛔ <strong>Bloqueado en Capa 2:</strong> El switch rechaza el envío directo porque PC-1 (VLAN 10) y PC-3 (VLAN 20) pertenecen a dominios de broadcast lógicos separados. Para comunicarse se requiere un Router (Capa 3).`;
+                statusEl.style.borderLeftColor = 'var(--danger)';
+            }, 1200);
+        }, 1200);
+
+    } else if (mode === 'router-on-stick') {
+        statusEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <strong>Escenario 3:</strong> PC-1 envía paquete al Default Gateway para alcanzar la subred de <strong>VLAN 20</strong>...`;
+        pc1.classList.add('highlight-active');
+
+        positionPacketAtDevice(packet, pc1);
+        packet.classList.remove('hidden');
+        tagLabel.textContent = 'VID:10';
+
+        vlanAnimTimeout = setTimeout(() => {
+            statusEl.innerHTML = `<i class="fa-solid fa-arrow-up"></i> Switch inserta cabecera <strong>IEEE 802.1Q (VID=10)</strong> y reenvía por enlace Troncal hacia el Router...`;
+            positionPacketAtDevice(packet, switchDev);
+            switchDev.classList.add('highlight-active');
+
+            tagField.textContent = 'IEEE 802.1Q (VID = 10 Header Inserted)';
+            tagField.style.backgroundColor = 'rgba(14, 165, 233, 0.2)';
+            tagField.style.color = '#0ea5e9';
+
+            vlanAnimTimeout = setTimeout(() => {
+                statusEl.innerHTML = `<i class="fa-solid fa-route"></i> Router recibe en subinterfaz <strong>Gi0/0.10</strong>, enruta a subinterfaz <strong>Gi0/0.20</strong> y re-etiqueta a <strong>VID=20</strong>.`;
+                positionPacketAtDevice(packet, routerDev);
+                routerDev.classList.add('highlight-success');
+                tagLabel.textContent = 'VID:20';
+
+                tagField.textContent = 'IEEE 802.1Q (VID = 20 Header Re-tagged)';
+                tagField.style.backgroundColor = 'rgba(168, 85, 247, 0.2)';
+                tagField.style.color = '#a855f7';
+
+                vlanAnimTimeout = setTimeout(() => {
+                    positionPacketAtDevice(packet, switchDev);
+
+                    vlanAnimTimeout = setTimeout(() => {
+                        positionPacketAtDevice(packet, pc3);
+                        if (pc3) pc3.classList.add('highlight-success');
+                        statusEl.innerHTML = `✅ <strong>Éxito Inter-VLAN:</strong> Paquete enrutado en Capa 3 y entregado a <strong>PC-3 (VLAN 20)</strong> a través del esquema Router-on-a-Stick.`;
+                        statusEl.style.borderLeftColor = 'var(--accent)';
+                    }, 1000);
+                }, 1000);
+            }, 1200);
+        }, 1200);
+    }
+}
+
+function positionPacketAtDevice(packetEl, deviceEl) {
+    if (!packetEl || !deviceEl) return;
+    const stage = document.querySelector('.vlan-topology-stage');
+    if (!stage) return;
+
+    const stageRect = stage.getBoundingClientRect();
+    const devRect = deviceEl.getBoundingClientRect();
+
+    const topOffset = (devRect.top - stageRect.top) + (devRect.height / 2) - 22;
+    const leftOffset = (devRect.left - stageRect.left) + (devRect.width / 2) - 22;
+
+    packetEl.style.top = `${topOffset}px`;
+    packetEl.style.left = `${leftOffset}px`;
+}

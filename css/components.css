@@ -778,3 +778,207 @@
     cursor: pointer;
 }
 
+/* ==========================================================================
+   VLAN INTERACTIVE ANIMATION SIMULATOR
+   ========================================================================== */
+.vlan-simulator-container {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 1.5rem 0 2.5rem 0;
+    box-shadow: var(--card-shadow);
+}
+
+.vlan-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.vlan-status-banner {
+    padding: 0.85rem 1.25rem;
+    background-color: var(--bg-secondary);
+    border-left: 4px solid var(--primary);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.vlan-topology-stage {
+    position: relative;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 380px;
+    overflow: hidden;
+}
+
+.vlan-device {
+    background-color: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.device-icon {
+    font-size: 1.8rem;
+    color: var(--primary);
+    margin-bottom: 0.35rem;
+}
+
+.device-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.device-subnet, .device-ip {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.vlan-tag-pill {
+    padding: 0.15rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin: 0.25rem 0;
+}
+
+.vlan10-pill {
+    background-color: rgba(14, 165, 233, 0.2);
+    color: #0ea5e9;
+    border: 1px solid rgba(14, 165, 233, 0.4);
+}
+
+.vlan20-pill {
+    background-color: rgba(168, 85, 247, 0.2);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.router-device {
+    border-color: var(--accent);
+}
+.router-device .device-icon {
+    color: var(--accent);
+}
+
+.switch-device {
+    border-color: var(--primary);
+}
+
+.vlan-pcs-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.25rem;
+    width: 100%;
+}
+
+.vlan10-pc {
+    border-color: rgba(14, 165, 233, 0.4);
+}
+
+.vlan20-pc {
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.vlan-device.highlight-active {
+    box-shadow: 0 0 0 4px var(--primary-glow);
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.vlan-device.highlight-success {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+    border-color: var(--accent);
+    transform: scale(1.05);
+}
+
+.vlan-device.highlight-blocked {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+    border-color: var(--danger);
+    opacity: 0.6;
+}
+
+/* Animated Data Packet Overlay */
+.vlan-packet {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 0 20px var(--primary-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.packet-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+/* Packet Inspector Panel */
+.vlan-packet-inspector {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.vlan-packet-inspector h4 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.frame-structure {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.frame-field {
+    padding: 0.4rem 0.75rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.tag-field {
+    background-color: rgba(14, 165, 233, 0.15);
+    color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 700;
+}
+
+
