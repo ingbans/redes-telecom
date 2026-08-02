@@ -402,6 +402,7 @@
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-block btn-lg mt-3"><i class="fa-solid fa-right-to-bracket"></i> Ingresar al Portal</button>
+                                <button type="button" class="btn btn-outline btn-block btn-lg mt-2" onclick="handleGoogleSignIn()"><i class="fa-brands fa-google" style="color:#ea4335; margin-right:0.5rem;"></i> Iniciar sesión con Google</button>
                             </form>
 
                             <!-- Page Register Form -->
@@ -660,6 +661,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block mt-3">Ingresar al Portal</button>
+                <button type="button" class="btn btn-outline btn-block mt-2" onclick="handleGoogleSignIn()"><i class="fa-brands fa-google" style="color:#ea4335; margin-right:0.5rem;"></i> Continuar con Google</button>
                 <div class="text-center mt-3" style="font-size:0.85rem;">
                     ¿Eres alumno y no tienes cuenta? <a href="#" onclick="openRegisterModal(); return false;" style="color:var(--primary);">Regístrate aquí</a>
                 </div>
@@ -697,7 +699,12 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Firebase Web SDK (v10 Compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Scripts del Proyecto -->
     <script src="js/topics-data.js"></script>
     <script src="js/commands-db.js"></script>
     <script src="js/subnet-calc.js"></script>

@@ -1,8 +1,19 @@
 /* ==========================================================================
-   PORTAL SYSTEM: AUTHENTICATION, ATTENDANCE, GRADEBOOK & QUIZ LOGS
+   PORTAL SYSTEM: FIREBASE AUTHENTICATION, FIRESTORE DATABASE & SYNC ENGINE
    ========================================================================== */
 
-// Default Data & Initial State
+// Firebase Configuration Keys
+const firebaseConfig = {
+  apiKey: "AIzaSyCaIIfEIDETVmYey-BW3Y0_QJKhJO3XlrY",
+  authDomain: "unefa-redes-telecom.firebaseapp.com",
+  projectId: "unefa-redes-telecom",
+  storageBucket: "unefa-redes-telecom.firebasestorage.app",
+  messagingSenderId: "1085766416677",
+  appId: "1:1085766416677:web:952ff24b69cc4c97b202cc",
+  measurementId: "G-084WQQBNTM"
+};
+
+// Default Data & Keys
 const PORTAL_KEYS = {
     STUDENTS: 'net_portal_students',
     CALENDAR: 'net_portal_calendar',
@@ -15,37 +26,157 @@ const PORTAL_KEYS = {
 
 const DEFAULT_TEACHER_PIN = "profesor2026";
 
-// App Portal State
-let currentSession = JSON.parse(localStorage.getItem(PORTAL_KEYS.SESSION) || 'null'); // { role: 'student'|'teacher', user: object|null }
+// Global Portal & Firebase Handles
+let db = null;
+let auth = null;
+let currentSession = JSON.parse(localStorage.getItem(PORTAL_KEYS.SESSION) || 'null');
 let registeredStudents = JSON.parse(localStorage.getItem(PORTAL_KEYS.STUDENTS) || '[]');
-let classCalendar = JSON.parse(localStorage.getItem(PORTAL_KEYS.CALENDAR) || '{}'); // { "clase-1": "2026-09-15", ... }
-let attendanceRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.ATTENDANCE) || '{}'); // { "studentId_claseId": "presente"|"ausente"|"justificado" }
-let gradesRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.GRADES) || '{}'); // { "studentId": { ex1: 18, ex2: 16, ex3: 19 } }
-let quizAttemptsRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.QUIZZES) || '{}'); // { "studentId": [ { score: 80, date: 'ISO' }, ... ] }
+let classCalendar = JSON.parse(localStorage.getItem(PORTAL_KEYS.CALENDAR) || '{}');
+let attendanceRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.ATTENDANCE) || '{}');
+let gradesRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.GRADES) || '{}');
+let quizAttemptsRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.QUIZZES) || '{}');
 
 function initPortalSystem() {
+    initFirebaseService();
     ensureDefaultCalendar();
     renderAuthUI();
     initPortalModals();
     initTeacherPanelEvents();
 }
 
+function initFirebaseService() {
+    if (typeof firebase !== 'undefined') {
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+            auth = firebase.auth();
+            console.log("🔥 Google Firebase inicializado con éxito.");
+            setupFirestoreRealtimeSync();
+        } catch (err) {
+            console.warn("Error al inicializar Firebase, operando en modo local:", err);
+        }
+    }
+}
+
+function setupFirestoreRealtimeSync() {
+    if (!db) return;
+
+    // Realtime Calendar Sync
+    db.collection('config').doc('calendar').onSnapshot(doc => {
+        if (doc.exists) {
+            classCalendar = doc.data();
+            localStorage.setItem(PORTAL_KEYS.CALENDAR, JSON.stringify(classCalendar));
+            if (window.location.hash === '#portal-teacher') renderCalendarConfigTab();
+            if (window.location.hash === '#portal-student') renderStudentPortal();
+        }
+    });
+
+    // Realtime Students Roster Sync
+    db.collection('students').onSnapshot(snapshot => {
+        registeredStudents = [];
+        snapshot.forEach(doc => {
+            registeredStudents.push({ id: doc.id, ...doc.data() });
+        });
+        localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+        if (window.location.hash === '#portal-teacher') renderRosterTab();
+    });
+
+    // Realtime Attendance Sync
+    db.collection('attendance').onSnapshot(snapshot => {
+        attendanceRecords = {};
+        snapshot.forEach(doc => {
+            attendanceRecords[doc.id] = doc.data().status;
+        });
+        localStorage.setItem(PORTAL_KEYS.ATTENDANCE, JSON.stringify(attendanceRecords));
+        if (window.location.hash === '#portal-student') renderStudentPortal();
+    });
+
+    // Realtime Exam Grades Sync
+    db.collection('grades').onSnapshot(snapshot => {
+        gradesRecords = {};
+        snapshot.forEach(doc => {
+            gradesRecords[doc.id] = doc.data();
+        });
+        localStorage.setItem(PORTAL_KEYS.GRADES, JSON.stringify(gradesRecords));
+        if (window.location.hash === '#portal-student') renderStudentPortal();
+        if (window.location.hash === '#portal-teacher') renderGradesTab();
+    });
+
+    // Realtime Quiz Attempts Sync
+    db.collection('quizzes').onSnapshot(snapshot => {
+        quizAttemptsRecords = {};
+        snapshot.forEach(doc => {
+            quizAttemptsRecords[doc.id] = doc.data().attempts || [];
+        });
+        localStorage.setItem(PORTAL_KEYS.QUIZZES, JSON.stringify(quizAttemptsRecords));
+    });
+}
+
 function ensureDefaultCalendar() {
     if (Object.keys(classCalendar).length === 0) {
-        // Set initial default dates for 12 classes
         const today = new Date();
         for (let i = 1; i <= 12; i++) {
             const nextDate = new Date(today);
             nextDate.setDate(today.getDate() + (i - 1) * 7);
             classCalendar[`clase-${i}`] = nextDate.toISOString().split('T')[0];
         }
-        localStorage.setItem(PORTAL_KEYS.CALENDAR, JSON.stringify(classCalendar));
+        saveCalendarData();
+    }
+}
+
+function saveCalendarData() {
+    localStorage.setItem(PORTAL_KEYS.CALENDAR, JSON.stringify(classCalendar));
+    if (db) {
+        db.collection('config').doc('calendar').set(classCalendar, { merge: true }).catch(console.error);
     }
 }
 
 /* ==========================================================================
-   AUTHENTICATION & SESSION MANAGEMENT
+   GOOGLE AUTHENTICATION & SESSION MANAGEMENT
    ========================================================================== */
+function handleGoogleSignIn() {
+    if (!auth) {
+        alert("El servicio de Google Firebase no está cargado. Revisa tu conexión a internet.");
+        return;
+    }
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            const user = result.user;
+            let existingStudent = registeredStudents.find(s => s.email === user.email.toLowerCase());
+
+            if (!existingStudent) {
+                // Auto create student profile from Google User
+                existingStudent = {
+                    id: user.uid,
+                    name: user.displayName || 'Estudiante Google',
+                    email: user.email.toLowerCase(),
+                    idNumber: 'Google Account',
+                    authProvider: 'google'
+                };
+                registeredStudents.push(existingStudent);
+                if (db) {
+                    db.collection('students').doc(user.uid).set(existingStudent, { merge: true });
+                }
+            }
+
+            currentSession = { role: 'student', user: existingStudent };
+            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+
+            closePortalModals();
+            renderAuthUI();
+            alert(`¡Bienvenido ${existingStudent.name}! Has iniciado sesión con Google.`);
+            window.location.hash = '#portal-student';
+        })
+        .catch((error) => {
+            console.error("Error Google Auth:", error);
+            alert(`Error al iniciar sesión con Google: ${error.message}`);
+        });
+}
+
 function renderAuthUI() {
     const userContainer = document.getElementById('navbar-user-area');
     if (!userContainer) return;
@@ -92,14 +223,18 @@ function updatePortalViewsAccess() {
 function handleLogout() {
     currentSession = null;
     localStorage.removeItem(PORTAL_KEYS.SESSION);
+    if (auth && auth.currentUser) {
+        auth.signOut().catch(console.error);
+    }
     renderAuthUI();
     window.location.hash = '#topic/clase-1';
 }
 
 /* ==========================================================================
-   MODAL HANDLERS
+   MODAL & FORM HANDLERS
    ========================================================================== */
 function initPortalModals() {
+    // Modal Register
     const registerForm = document.getElementById('student-register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -109,107 +244,31 @@ function initPortalModals() {
             const idNumber = document.getElementById('reg-id').value.trim();
             const password = document.getElementById('reg-password').value;
 
-            if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
-                alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
-                return;
-            }
-
-            const newStudent = {
-                id: 'std_' + Date.now(),
-                name,
-                email,
-                idNumber,
-                password
-            };
-
-            registeredStudents.push(newStudent);
-            localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
-
-            // Auto login as student
-            currentSession = { role: 'student', user: newStudent };
-            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-
-            closePortalModals();
-            renderAuthUI();
-            alert(`¡Registro exitoso! Bienvenido ${name}.`);
-            window.location.hash = '#portal-student';
+            performStudentRegistration(name, email, idNumber, password);
         });
     }
 
+    // Modal Login
     const loginForm = document.getElementById('portal-login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const role = document.querySelector('input[name="login-role"]:checked').value;
-
-            if (role === 'teacher') {
-                const pinInput = document.getElementById('login-teacher-pin').value;
-                const savedPin = localStorage.getItem(PORTAL_KEYS.TEACHER_PIN) || DEFAULT_TEACHER_PIN;
-
-                if (pinInput === savedPin) {
-                    currentSession = { role: 'teacher', user: { name: 'Profesor de Telecomunicaciones' } };
-                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-                    closePortalModals();
-                    renderAuthUI();
-                    window.location.hash = '#portal-teacher';
-                } else {
-                    alert('Clave de Profesor/Administrador incorrecta.');
-                }
-            } else {
-                const email = document.getElementById('login-email').value.trim().toLowerCase();
-                const password = document.getElementById('login-password').value;
-
-                const student = registeredStudents.find(s => s.email === email && s.password === password);
-                if (student) {
-                    currentSession = { role: 'student', user: student };
-                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-                    closePortalModals();
-                    renderAuthUI();
-                    window.location.hash = '#portal-student';
-                } else {
-                    alert('Correo o contraseña de estudiante incorrecta.');
-                }
-            }
+            performUserLogin(role, 'modal');
         });
     }
 
-    // Full Page Login Form
+    // Full Page Login
     const pageLoginForm = document.getElementById('page-login-form');
     if (pageLoginForm) {
         pageLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const role = document.querySelector('input[name="page-login-role"]:checked').value;
-
-            if (role === 'teacher') {
-                const pinInput = document.getElementById('page-login-teacher-pin').value;
-                const savedPin = localStorage.getItem(PORTAL_KEYS.TEACHER_PIN) || DEFAULT_TEACHER_PIN;
-
-                if (pinInput === savedPin) {
-                    currentSession = { role: 'teacher', user: { name: 'Profesor de Telecomunicaciones' } };
-                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-                    renderAuthUI();
-                    window.location.hash = '#portal-teacher';
-                } else {
-                    alert('Clave de Profesor/Administrador incorrecta.');
-                }
-            } else {
-                const email = document.getElementById('page-login-email').value.trim().toLowerCase();
-                const password = document.getElementById('page-login-password').value;
-
-                const student = registeredStudents.find(s => s.email === email && s.password === password);
-                if (student) {
-                    currentSession = { role: 'student', user: student };
-                    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-                    renderAuthUI();
-                    window.location.hash = '#portal-student';
-                } else {
-                    alert('Correo o contraseña de estudiante incorrecta.');
-                }
-            }
+            performUserLogin(role, 'page');
         });
     }
 
-    // Full Page Register Form
+    // Full Page Register
     const pageRegisterForm = document.getElementById('page-register-form');
     if (pageRegisterForm) {
         pageRegisterForm.addEventListener('submit', (e) => {
@@ -219,29 +278,71 @@ function initPortalModals() {
             const idNumber = document.getElementById('page-reg-id').value.trim();
             const password = document.getElementById('page-reg-password').value;
 
-            if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
-                alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
-                return;
-            }
-
-            const newStudent = {
-                id: 'std_' + Date.now(),
-                name,
-                email,
-                idNumber,
-                password
-            };
-
-            registeredStudents.push(newStudent);
-            localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
-
-            currentSession = { role: 'student', user: newStudent };
-            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-
-            renderAuthUI();
-            alert(`¡Registro exitoso! Bienvenido ${name}.`);
-            window.location.hash = '#portal-student';
+            performStudentRegistration(name, email, idNumber, password);
         });
+    }
+}
+
+function performStudentRegistration(name, email, idNumber, password) {
+    if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
+        alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
+        return;
+    }
+
+    const stdId = 'std_' + Date.now();
+    const newStudent = {
+        id: stdId,
+        name,
+        email,
+        idNumber,
+        password,
+        authProvider: 'email'
+    };
+
+    registeredStudents.push(newStudent);
+    localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+    if (db) {
+        db.collection('students').doc(stdId).set(newStudent).catch(console.error);
+    }
+
+    currentSession = { role: 'student', user: newStudent };
+    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+
+    closePortalModals();
+    renderAuthUI();
+    alert(`¡Registro exitoso en la nube! Bienvenido ${name}.`);
+    window.location.hash = '#portal-student';
+}
+
+function performUserLogin(role, sourcePrefix) {
+    if (role === 'teacher') {
+        const pinInput = document.getElementById(sourcePrefix === 'modal' ? 'login-teacher-pin' : 'page-login-teacher-pin').value;
+        const savedPin = localStorage.getItem(PORTAL_KEYS.TEACHER_PIN) || DEFAULT_TEACHER_PIN;
+
+        if (pinInput === savedPin) {
+            currentSession = { role: 'teacher', user: { name: 'Profesor de Telecomunicaciones' } };
+            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+            closePortalModals();
+            renderAuthUI();
+            window.location.hash = '#portal-teacher';
+        } else {
+            alert('Clave de Profesor/Administrador incorrecta.');
+        }
+    } else {
+        const email = document.getElementById(sourcePrefix === 'modal' ? 'login-email' : 'page-login-email').value.trim().toLowerCase();
+        const password = document.getElementById(sourcePrefix === 'modal' ? 'login-password' : 'page-login-password').value;
+
+        const student = registeredStudents.find(s => s.email === email && s.password === password);
+        if (student) {
+            currentSession = { role: 'student', user: student };
+            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+            closePortalModals();
+            renderAuthUI();
+            window.location.hash = '#portal-student';
+        } else {
+            alert('Correo o contraseña de estudiante incorrecta.');
+        }
     }
 }
 
@@ -288,12 +389,17 @@ function recordStudentQuizAttempt(percentScore) {
     const stdId = currentSession.user.id;
     if (!quizAttemptsRecords[stdId]) quizAttemptsRecords[stdId] = [];
 
-    quizAttemptsRecords[stdId].push({
+    const newAttempt = {
         score: percentScore,
         date: new Date().toISOString()
-    });
+    };
+    quizAttemptsRecords[stdId].push(newAttempt);
 
     localStorage.setItem(PORTAL_KEYS.QUIZZES, JSON.stringify(quizAttemptsRecords));
+
+    if (db) {
+        db.collection('quizzes').doc(stdId).set({ attempts: quizAttemptsRecords[stdId] }, { merge: true }).catch(console.error);
+    }
 }
 
 /* ==========================================================================
@@ -432,7 +538,7 @@ function renderCalendarConfigTab() {
         input.addEventListener('change', (e) => {
             const topicId = e.target.getAttribute('data-topic-id');
             classCalendar[topicId] = e.target.value;
-            localStorage.setItem(PORTAL_KEYS.CALENDAR, JSON.stringify(classCalendar));
+            saveCalendarData();
         });
     });
 }
@@ -492,9 +598,14 @@ function renderAttendanceForSelectedClass() {
             const stdId = e.target.getAttribute('data-student-id');
             const topId = e.target.getAttribute('data-topic-id');
             const newStatus = e.target.value;
+            const docKey = `${stdId}_${topId}`;
 
-            attendanceRecords[`${stdId}_${topId}`] = newStatus;
+            attendanceRecords[docKey] = newStatus;
             localStorage.setItem(PORTAL_KEYS.ATTENDANCE, JSON.stringify(attendanceRecords));
+
+            if (db) {
+                db.collection('attendance').doc(docKey).set({ studentId: stdId, topicId: topId, status: newStatus }).catch(console.error);
+            }
         });
     });
 }
@@ -541,6 +652,10 @@ function renderGradesTab() {
             gradesRecords[stdId][examKey] = val;
 
             localStorage.setItem(PORTAL_KEYS.GRADES, JSON.stringify(gradesRecords));
+
+            if (db) {
+                db.collection('grades').doc(stdId).set(gradesRecords[stdId], { merge: true }).catch(console.error);
+            }
             updateLiveStudentAvg(stdId);
         });
     });
@@ -591,6 +706,10 @@ function deleteStudent(studentId) {
     if (confirm('¿Estás seguro de eliminar a este estudiante de la nómina?')) {
         registeredStudents = registeredStudents.filter(s => s.id !== studentId);
         localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+        if (db) {
+            db.collection('students').doc(studentId).delete().catch(console.error);
+        }
         renderTeacherPanel();
     }
 }
