@@ -219,42 +219,33 @@ function processAuthenticatedGoogleUser(user) {
 
     // Check Whitelist Security for Students
     if (!isEmailWhitelisted(email)) {
-        // Delete the Firebase Auth account immediately to prevent unauthorized user accumulation
         user.delete()
             .then(() => {
                 console.warn(`Usuario no autorizado eliminado de Firebase Auth: ${email}`);
             })
             .catch(() => {
-                // If delete fails (e.g. token expired), sign out as fallback
                 auth.signOut();
             });
         alert(`Su correo electrónico no está autorizado para participar en este curso.`);
         return;
     }
 
-    let existingStudent = registeredStudents.find(s => s.email === email);
+    // Check if student already registered
+    const existingStudent = registeredStudents.find(s => s.email === email);
 
-    if (!existingStudent) {
-        existingStudent = {
-            id: user.uid,
-            name: user.displayName || 'Estudiante Google',
-            email: email,
-            idNumber: 'Google Account',
-            authProvider: 'google'
-        };
-        registeredStudents.push(existingStudent);
-        if (db) {
-            db.collection('students').doc(user.uid).set(existingStudent, { merge: true });
-        }
+    if (existingStudent) {
+        // Already registered — log in directly
+        currentSession = { role: 'student', user: existingStudent };
+        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+        closePortalModals();
+        renderAuthUI();
+        window.location.hash = '#portal-student';
+    } else {
+        // New student — ask for personal data
+        window._pendingGoogleUser = user;
+        closePortalModals();
+        document.getElementById('student-data-modal-overlay').classList.remove('hidden');
     }
-
-    currentSession = { role: 'student', user: existingStudent };
-    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-
-    closePortalModals();
-    renderAuthUI();
-    alert(`¡Bienvenido ${existingStudent.name}! Has iniciado sesión con Google.`);
-    window.location.hash = '#portal-student';
 }
 
 function renderAuthUI() {
@@ -321,6 +312,52 @@ function initPortalModals() {
             const inputVal = document.getElementById('whitelist-input-emails').value;
             addEmailsToWhitelist(inputVal);
             document.getElementById('whitelist-input-emails').value = '';
+        });
+    }
+
+    const studentDataForm = document.getElementById('student-data-form');
+    if (studentDataForm) {
+        studentDataForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const googleUser = window._pendingGoogleUser;
+            if (!googleUser) return;
+
+            const nombre = document.getElementById('sd-nombre').value.trim();
+            const apellido = document.getElementById('sd-apellido').value.trim();
+            const cedula = document.getElementById('sd-cedula').value.trim();
+
+            if (!nombre || !apellido || !cedula) {
+                alert('Por favor completa todos los campos requeridos.');
+                return;
+            }
+
+            const fullName = `${nombre} ${apellido}`;
+            const email = googleUser.email.toLowerCase().trim();
+
+            const newStudent = {
+                id: googleUser.uid,
+                name: fullName,
+                email: email,
+                idNumber: cedula,
+                authProvider: 'google'
+            };
+
+            registeredStudents.push(newStudent);
+            localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+            if (db) {
+                db.collection('students').doc(googleUser.uid).set(newStudent, { merge: true });
+            }
+
+            currentSession = { role: 'student', user: newStudent };
+            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+
+            // Close modal and clean up
+            document.getElementById('student-data-modal-overlay').classList.add('hidden');
+            window._pendingGoogleUser = null;
+
+            renderAuthUI();
+            window.location.hash = '#portal-student';
         });
     }
 }

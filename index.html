@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Plataforma académica interactiva del curso de Redes de Telecomunicaciones.">
-    <title>Redes de Telecomunicaciones | Plataforma Académica</title>
+    <title>Redes de Telecomunicaciones - UNEFA | Plataforma Académica</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,12 +24,12 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <div class="brand-icon">
-                        <i class="fa-solid fa-network-wired"></i>
+                    <div class="brand-icon" style="background:transparent; padding:0; width:48px; height:48px;">
+                        <img src="img/unefa-logo.png" alt="Logo UNEFA" style="width:48px; height:48px; object-fit:contain;">
                     </div>
                     <div class="brand-text">
-                        <span class="brand-title">NetAcademy</span>
-                        <span class="brand-subtitle">Redes & Telecom</span>
+                        <span class="brand-title">Redes de Telecomunicaciones</span>
+                        <span class="brand-subtitle">UNEFA</span>
                     </div>
                 </div>
                 <button class="btn-icon mobile-close-btn" id="close-sidebar-btn" aria-label="Cerrar menú">
@@ -629,5 +629,30 @@
     <script src="js/quiz-engine.js"></script>
     <script src="js/portal-system.js"></script>
     <script src="js/app.js"></script>
+    <!-- Modal: Datos del Alumno (primer acceso con Google) -->
+    <div class="portal-modal-overlay hidden" id="student-data-modal-overlay">
+        <div class="portal-modal-box" id="student-data-modal-box" style="max-width:480px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Completa tu Perfil de Estudiante</h3>
+            </div>
+            <p style="color:var(--text-secondary); margin-bottom:1.25rem; font-size:0.9rem;">Para vincular tu cuenta de Google con la nómina del curso, por favor ingresa tus datos personales:</p>
+            <form id="student-data-form">
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="sd-nombre" required placeholder="Ej. Carlos">
+                </div>
+                <div class="form-group">
+                    <label>Apellido:</label>
+                    <input type="text" id="sd-apellido" required placeholder="Ej. Mendoza">
+                </div>
+                <div class="form-group">
+                    <label>Cédula de Identidad:</label>
+                    <input type="text" id="sd-cedula" required placeholder="Ej. 28.123.456">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-3"><i class="fa-solid fa-check"></i> Confirmar y Acceder al Portal</button>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>
