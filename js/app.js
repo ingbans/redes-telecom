@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // App State
-let currentTopicId = "m1-osi-tcpip";
+let currentTopicId = "w1-osi-tcpip";
 let completedTopics = JSON.parse(localStorage.getItem('ccna_completed_topics') || '[]');
 
 /* ==========================================================================
