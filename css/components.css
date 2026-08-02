@@ -1,0 +1,622 @@
+/* ==========================================================================
+   UI COMPONENTS & TOOLS STYLESHEET
+   Course: Telecom Networks (Cisco CCNA 200-301)
+   ========================================================================== */
+
+/* Topic Article Styling */
+.topic-body-content {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+}
+
+.topic-body-content h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 1.8rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.topic-body-content h2 i {
+    color: var(--primary);
+}
+
+.topic-body-content h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 1.4rem 0 0.75rem 0;
+}
+
+.topic-body-content p {
+    color: var(--text-secondary);
+    margin-bottom: 1.1rem;
+    font-size: 0.98rem;
+    line-height: 1.7;
+}
+
+.topic-body-content ul, 
+.topic-body-content ol {
+    margin: 0 0 1.2rem 1.5rem;
+    color: var(--text-secondary);
+}
+
+.topic-body-content li {
+    margin-bottom: 0.4rem;
+}
+
+/* Callout Box / Alert Cards */
+.callout {
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 1rem;
+    background-color: var(--bg-tertiary);
+    border-left: 4px solid var(--primary);
+}
+
+.callout-info {
+    border-left-color: var(--primary);
+    background-color: rgba(14, 165, 233, 0.08);
+}
+.callout-tip {
+    border-left-color: var(--accent);
+    background-color: rgba(16, 185, 129, 0.08);
+}
+.callout-warning {
+    border-left-color: var(--warning);
+    background-color: rgba(245, 158, 11, 0.08);
+}
+
+.callout-icon {
+    font-size: 1.3rem;
+    color: var(--primary);
+    margin-top: 0.1rem;
+}
+.callout-tip .callout-icon { color: var(--accent); }
+.callout-warning .callout-icon { color: var(--warning); }
+
+.callout-content h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+.callout-content p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* Cisco CLI Terminal Code Block */
+.code-block-wrapper {
+    position: relative;
+    background-color: var(--code-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin: 1.25rem 0;
+    overflow: hidden;
+}
+
+.code-header {
+    background-color: rgba(255, 255, 255, 0.04);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.code-header-dots {
+    display: flex;
+    gap: 6px;
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.dot-red { background-color: #ef4444; }
+.dot-yellow { background-color: #f59e0b; }
+.dot-green { background-color: #10b981; }
+
+.btn-copy-code {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.btn-copy-code:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.code-block-wrapper pre {
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88rem;
+    color: #38bdf8;
+    line-height: 1.6;
+}
+
+.code-block-wrapper code {
+    font-family: 'Fira Code', monospace;
+}
+
+/* Cisco CLI Syntax Highlights */
+.cli-prompt { color: #f43f5e; font-weight: bold; }
+.cli-cmd { color: #38bdf8; font-weight: bold; }
+.cli-param { color: #a78bfa; }
+.cli-comment { color: #64748b; font-style: italic; }
+
+/* Custom Data Tables */
+.custom-table-container {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.custom-table th {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.custom-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.custom-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tbody tr:hover {
+    background-color: var(--bg-surface-hover);
+}
+
+/* Footer Topic Nav */
+.topic-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.topic-footer-nav .btn-outline {
+    flex: 1;
+    max-width: 450px;
+    padding: 1rem;
+}
+.nav-btn-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.nav-btn-text.text-right {
+    align-items: flex-end;
+}
+
+/* ==========================================================================
+   TOOLS: SUBNETTING CALCULATOR
+   ========================================================================== */
+.tool-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tool-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.subnet-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 1.5rem;
+}
+
+.calc-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: var(--card-shadow);
+}
+
+.calc-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: 'Fira Code', monospace;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.res-item {
+    background-color: var(--bg-tertiary);
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.res-item.full-width {
+    grid-column: span 2;
+}
+
+.res-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.res-value {
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.res-value.highlight {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.binary-box {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    word-break: break-all;
+    background-color: var(--code-bg);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-top: 0.2rem;
+}
+
+/* ==========================================================================
+   TOOLS: CISCO CLI CHEATSHEET
+   ========================================================================== */
+.cli-filter-bar {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chip {
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.chip:hover {
+    background-color: var(--bg-surface-hover);
+    color: var(--text-primary);
+}
+
+.chip.active {
+    background-color: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
+.commands-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.25rem;
+}
+
+.command-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.command-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-highlight);
+}
+
+.cmd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.cmd-mode-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    background-color: var(--bg-tertiary);
+    color: var(--secondary);
+    text-transform: uppercase;
+}
+
+.cmd-syntax {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.92rem;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.cmd-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   TOOLS: QUIZ SIMULATOR
+   ========================================================================== */
+.quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.quiz-setup-card,
+.quiz-active-card,
+.quiz-result-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.quiz-module-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.quiz-mod-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quiz-mod-option:hover {
+    border-color: var(--primary);
+    background-color: var(--bg-surface-hover);
+}
+
+.quiz-mod-option.selected {
+    border-color: var(--primary);
+    background-color: var(--primary-glow);
+}
+
+.quiz-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.quiz-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quiz-option-btn:hover:not(:disabled) {
+    background-color: var(--bg-surface-hover);
+    border-color: var(--primary);
+}
+
+.quiz-option-btn.selected {
+    border-color: var(--primary);
+    background-color: var(--primary-glow);
+}
+
+.quiz-option-btn.correct {
+    border-color: var(--accent);
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--accent);
+}
+
+.quiz-option-btn.wrong {
+    border-color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+
+.quiz-feedback-box {
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.quiz-feedback-box.correct {
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--accent);
+}
+.quiz-feedback-box.wrong {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger);
+}
+
+.feedback-status {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.quiz-feedback-box.correct .feedback-status { color: var(--accent); }
+.quiz-feedback-box.wrong .feedback-status { color: var(--danger); }
+
+/* Deployment Step Cards */
+.deploy-steps-container {
+    display: flex;
+    flex-direction: flex-column;
+    gap: 1.5rem;
+
+}
+
+.step-card {
+    display: flex;
+    gap: 1.25rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.info-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: rgba(14, 165, 233, 0.1);
+    border: 1px solid var(--primary-glow);
+    border-radius: 10px;
+    margin-top: 1rem;
+    color: var(--primary);
+    font-size: 0.88rem;
+}
+
+@media (max-width: 768px) {
+    .subnet-calc-grid {
+        grid-template-columns: 1fr;
+    }
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    .res-item.full-width {
+        grid-column: span 1;
+    }
+    .commands-grid {
+        grid-template-columns: 1fr;
+    }
+}

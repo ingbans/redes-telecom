@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Plataforma académica interactiva del curso de Redes de Telecomunicaciones basada en el temario de certificación Cisco CCNA 200-301.">
+    <title>Redes de Telecomunicaciones | Curso CCNA 200-301</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome SVG Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">NetAcademy</span>
+                        <span class="brand-subtitle">CCNA 200-301</span>
+                    </div>
+                </div>
+                <button class="btn-icon mobile-close-btn" id="close-sidebar-btn" aria-label="Cerrar menú">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Global Search -->
+            <div class="sidebar-search">
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="global-search-input" placeholder="Buscar tema o comando..." autocomplete="off">
+                    <button class="search-clear-btn hidden" id="search-clear-btn">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Course Progress Overview -->
+            <div class="sidebar-progress-card">
+                <div class="progress-info">
+                    <span>Progreso del Curso</span>
+                    <strong id="sidebar-progress-percent">0%</strong>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="sidebar-progress-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav" id="sidebar-nav">
+                <div class="nav-section-title">Herramientas y Recursos</div>
+                <ul class="nav-list tools-list">
+                    <li>
+                        <a href="#tool-subnet" class="nav-item" data-tool="subnet">
+                            <i class="fa-solid fa-calculator"></i>
+                            <span>Calculadora Subnetting</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tool-cli" class="nav-item" data-tool="cli">
+                            <i class="fa-solid fa-terminal"></i>
+                            <span>Cheatsheet Cisco CLI</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tool-quiz" class="nav-item" data-tool="quiz">
+                            <i class="fa-solid fa-circle-question"></i>
+                            <span>Simulador de Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#tool-deploy" class="nav-item" data-tool="deploy">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Publicar en GitHub</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-section-title">Módulos del Curso</div>
+                <div class="modules-tree" id="modules-tree">
+                    <!-- Populated dynamically via app.js -->
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-role-badge">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Prof. Telecomunicaciones</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="navbar-left">
+                    <button class="btn-icon hamburger-btn" id="toggle-sidebar-btn" aria-label="Abrir menú">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="breadcrumb" id="breadcrumb">
+                        <span class="bc-item">Inicio</span>
+                        <i class="fa-solid fa-chevron-right bc-separator"></i>
+                        <span class="bc-item active" id="bc-current">Fundamentos de Redes</span>
+                    </div>
+                </div>
+
+                <div class="navbar-right">
+                    <button class="btn-theme-toggle" id="theme-toggle-btn" title="Cambiar tema">
+                        <i class="fa-solid fa-moon theme-icon-dark"></i>
+                        <i class="fa-solid fa-sun theme-icon-light"></i>
+                        <span class="theme-text">Modo Oscuro</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic Body View Container -->
+            <main class="content-container" id="main-content">
+                
+                <!-- VIEW 1: Topic Viewer (Default) -->
+                <section class="view-section active" id="view-topic">
+                    <div class="topic-header-banner" id="topic-header-banner">
+                        <div class="topic-meta">
+                            <span class="module-badge" id="topic-module-badge">Módulo 1</span>
+                            <span class="time-badge" id="topic-time-badge"><i class="fa-regular fa-clock"></i> 25 min</span>
+                        </div>
+                        <h1 class="topic-title" id="topic-title">Modelo OSI vs TCP/IP y Arquitecturas de Red</h1>
+                        <p class="topic-description" id="topic-description">
+                            Comprende la pila de protocolos fundamental, el proceso de encapsulamiento y cómo se estructuran las redes modernas.
+                        </p>
+                        <div class="topic-actions">
+                            <button class="btn btn-primary" id="mark-complete-btn">
+                                <i class="fa-regular fa-circle-check"></i>
+                                <span id="mark-complete-text">Marcar como Completado</span>
+                            </button>
+                            <button class="btn btn-secondary" id="topic-quiz-btn">
+                                <i class="fa-solid fa-vial"></i>
+                                <span>Quiz del Tema</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Topic Detailed HTML Content -->
+                    <div class="topic-body-content" id="topic-body-content">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Navigation Next/Previous Topic -->
+                    <div class="topic-footer-nav">
+                        <button class="btn btn-outline" id="prev-topic-btn">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <div class="nav-btn-text">
+                                <small>Anterior</small>
+                                <strong id="prev-topic-title">-</strong>
+                            </div>
+                        </button>
+                        <button class="btn btn-outline" id="next-topic-btn">
+                            <div class="nav-btn-text text-right">
+                                <small>Siguiente</small>
+                                <strong id="next-topic-title">-</strong>
+                            </div>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: Subnetting Calculator Tool -->
+                <section class="view-section" id="view-tool-subnet">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-calculator"></i></div>
+                        <div>
+                            <h2>Calculadora de Subnetting IPv4 & IPv6</h2>
+                            <p>Calcula direcciones de red, broadcast, rangos de hosts válidos y equivalencias en binario para redes Cisco.</p>
+                        </div>
+                    </div>
+
+                    <div class="subnet-calc-grid">
+                        <div class="calc-card input-card">
+                            <h3><i class="fa-solid fa-sliders"></i> Datos de Entrada</h3>
+                            <form id="subnet-form">
+                                <div class="form-group">
+                                    <label for="ip-address-input">Dirección IP IPv4:</label>
+                                    <input type="text" id="ip-address-input" value="192.168.10.45" placeholder="Ej. 10.0.0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cidr-select">Máscara de Red (CIDR):</label>
+                                    <select id="cidr-select">
+                                        <!-- Options added dynamically in subnet-calc.js -->
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-bolt"></i> Calcular Subred
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="calc-card results-card" id="subnet-results">
+                            <h3><i class="fa-solid fa-square-poll-vertical"></i> Resultados del Cálculo</h3>
+                            <div class="results-grid">
+                                <div class="res-item">
+                                    <span class="res-label">Dirección de Red:</span>
+                                    <strong class="res-value highlight" id="res-net-addr">192.168.10.0</strong>
+                                </div>
+                                <div class="res-item">
+                                    <span class="res-label">Dirección Broadcast:</span>
+                                    <strong class="res-value highlight" id="res-broad-addr">192.168.10.255</strong>
+                                </div>
+                                <div class="res-item">
+                                    <span class="res-label">Primer IP Útil:</span>
+                                    <strong class="res-value" id="res-first-ip">192.168.10.1</strong>
+                                </div>
+                                <div class="res-item">
+                                    <span class="res-label">Última IP Útil:</span>
+                                    <strong class="res-value" id="res-last-ip">192.168.10.254</strong>
+                                </div>
+                                <div class="res-item">
+                                    <span class="res-label">Máscara en Formato Dotted:</span>
+                                    <strong class="res-value" id="res-netmask">255.255.255.0</strong>
+                                </div>
+                                <div class="res-item">
+                                    <span class="res-label">Máscara Wildcard:</span>
+                                    <strong class="res-value" id="res-wildcard">0.0.0.255</strong>
+                                </div>
+                                <div class="res-item full-width">
+                                    <span class="res-label">Total Hosts Usables:</span>
+                                    <strong class="res-value badge-count" id="res-hosts-count">254</strong>
+                                </div>
+                                <div class="res-item full-width">
+                                    <span class="res-label">Representación en Binario:</span>
+                                    <div class="binary-box" id="res-binary">
+                                        11000000.10101000.00001010.00000000
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: Cisco CLI Cheatsheet Tool -->
+                <section class="view-section" id="view-tool-cli">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-terminal"></i></div>
+                        <div>
+                            <h2>Guía & Cheatsheet de Comandos Cisco IOS</h2>
+                            <p>Consulta la sintaxis exacta, explicaciones y ejemplos reales para Switches y Routers Cisco.</p>
+                        </div>
+                    </div>
+
+                    <div class="cli-filter-bar">
+                        <div class="search-input-wrapper">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="cli-search-input" placeholder="Buscar comando (ej. show ip route, vlan, ospf)...">
+                        </div>
+                        <div class="category-chips" id="cli-category-chips">
+                            <button class="chip active" data-cat="all">Todos</button>
+                            <button class="chip" data-cat="basic">Básicos & Inicial</button>
+                            <button class="chip" data-cat="vlan">VLANs & Trunking</button>
+                            <button class="chip" data-cat="routing">Enrutamiento & OSPF</button>
+                            <button class="chip" data-cat="security">Seguridad & ACLs</button>
+                            <button class="chip" data-cat="services">DHCP & NAT</button>
+                        </div>
+                    </div>
+
+                    <div class="commands-grid" id="commands-grid">
+                        <!-- Populated dynamically via commands-db.js -->
+                    </div>
+                </section>
+
+                <!-- VIEW 4: Quiz Engine Tool -->
+                <section class="view-section" id="view-tool-quiz">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-circle-question"></i></div>
+                        <div>
+                            <h2>Simulador de Evaluaciones CCNA 200-301</h2>
+                            <p>Pon a prueba los conocimientos del curso con reactivos tipo certificación Cisco.</p>
+                        </div>
+                    </div>
+
+                    <div class="quiz-container" id="quiz-container">
+                        <div class="quiz-setup-card" id="quiz-setup">
+                            <h3>Selecciona el Módulo a Evaluar</h3>
+                            <div class="quiz-module-selector" id="quiz-module-selector">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <button class="btn btn-primary btn-lg mt-4" id="start-quiz-btn">
+                                <i class="fa-solid fa-play"></i> Iniciar Cuestionario
+                            </button>
+                        </div>
+
+                        <div class="quiz-active-card hidden" id="quiz-active">
+                            <div class="quiz-header-bar">
+                                <span class="quiz-progress-text" id="quiz-question-num">Pregunta 1 de 5</span>
+                                <span class="quiz-timer" id="quiz-timer"><i class="fa-regular fa-clock"></i> 00:00</span>
+                            </div>
+                            <div class="quiz-question-box">
+                                <h3 id="quiz-question-text">¿Cuál es la máscara de subred por defecto para una red de Clase C?</h3>
+                                <div class="quiz-options-list" id="quiz-options">
+                                    <!-- Options populated dynamically -->
+                                </div>
+                            </div>
+                            <div class="quiz-feedback-box hidden" id="quiz-feedback">
+                                <div class="feedback-status" id="feedback-status"></div>
+                                <p class="feedback-explanation" id="feedback-explanation"></p>
+                            </div>
+                            <div class="quiz-actions">
+                                <button class="btn btn-primary" id="next-question-btn" disabled>
+                                    Siguiente Pregunta <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="quiz-result-card hidden" id="quiz-result">
+                            <div class="result-icon-circle" id="result-icon-circle">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <h2 id="result-title">¡Evaluación Completada!</h2>
+                            <div class="result-score">
+                                <span id="result-score-percent">80%</span>
+                                <p id="result-score-text">Respondiste correctamente 4 de 5 preguntas.</p>
+                            </div>
+                            <button class="btn btn-primary" id="restart-quiz-btn">
+                                <i class="fa-solid fa-rotate-right"></i> Intentar Nuevamente
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 5: GitHub Pages Deployment Guide -->
+                <section class="view-section" id="view-tool-deploy">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <div>
+                            <h2>Guía de Publicación Gratuita en GitHub Pages</h2>
+                            <p>Instrucciones sencillas para publicar tu curso en internet en 3 minutos.</p>
+                        </div>
+                    </div>
+
+                    <div class="deploy-steps-container">
+                        <div class="step-card">
+                            <div class="step-num">1</div>
+                            <div class="step-content">
+                                <h3>Crear un Repositorio en GitHub</h3>
+                                <p>Ingresa a tu cuenta de <a href="https://github.com/new" target="_blank" rel="noopener">GitHub.com</a> y crea un nuevo repositorio público (ejemplo: <code>curso-redes-ccna</code>).</p>
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-num">2</div>
+                            <div class="step-content">
+                                <h3>Subir los Archivos mediante la Terminal (Git)</h3>
+                                <p>Ejecuta los siguientes comandos desde esta carpeta en tu computadora:</p>
+                                <div class="code-block-wrapper">
+                                    <pre><code>git init
+git add .
+git commit -m "Publicación inicial del curso de Redes CCNA"
+git branch -M main
+git remote add origin https://github.com/TU-USUARIO/curso-redes-ccna.git
+git push -u origin main</code></pre>
+                                    <button class="btn-copy-code" onclick="navigator.clipboard.writeText('git init\ngit add .\ngit commit -m \"Publicación inicial del curso de Redes CCNA\"\ngit branch -M main\ngit remote add origin https://github.com/TU-USUARIO/curso-redes-ccna.git\ngit push -u origin main')">
+                                        <i class="fa-regular fa-copy"></i> Copiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-card">
+                            <div class="step-num">3</div>
+                            <div class="step-content">
+                                <h3>Activar GitHub Pages</h3>
+                                <p>En tu repositorio en GitHub, ve a <strong>Settings &gt; Pages</strong>. En la sección <em>Build and deployment</em>, selecciona la rama <code>main</code> y carpeta <code>/ (root)</code>. Haz clic en <strong>Save</strong>.</p>
+                                <div class="info-alert">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    <span>¡Listo! En unos segundos tu sitio estará disponible públicamente en <code>https://tu-usuario.github.io/curso-redes-ccna/</code></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Search Results Overlay View -->
+                <section class="view-section" id="view-search-results">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <div>
+                            <h2>Resultados de Búsqueda</h2>
+                            <p id="search-query-display">Mostrando resultados para: ""</p>
+                        </div>
+                    </div>
+                    <div class="search-results-list" id="search-results-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/topics-data.js"></script>
+    <script src="js/commands-db.js"></script>
+    <script src="js/subnet-calc.js"></script>
+    <script src="js/quiz-engine.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
