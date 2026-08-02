@@ -177,6 +177,13 @@ function handleHashChange() {
             // Update breadcrumb
             const bcCurrent = document.getElementById('bc-current');
             if (bcCurrent) bcCurrent.textContent = getToolTitle(toolName);
+
+            if (toolName === 'vlan') {
+                setTimeout(() => {
+                    drawVLANCables();
+                    runVLANSimulation('same-vlan');
+                }, 150);
+            }
         }
     } else if (hash === '#portal-student') {
         renderStudentPortal();
@@ -195,6 +202,7 @@ function handleHashChange() {
 
 function getToolTitle(toolName) {
     switch (toolName) {
+        case 'vlan': return 'Simulador Animado de VLANs (IEEE 802.1Q)';
         case 'login': return 'Acceso al Portal / Inicio de Sesión';
         case 'subnet': return 'Calculadora Subnetting';
         case 'cli': return 'Cheatsheet Cisco CLI';

@@ -12,6 +12,14 @@ const courseTopicsData = [
         duration: "4 Horas",
         description: "Fundamentos de telecomunicaciones, pila de protocolos de 7 y 4 capas, unidades de datos (PDU) y proceso de encapsulamiento.",
         content: `
+            <div class="callout callout-info" style="border-left-color: var(--primary); cursor: pointer;" onclick="window.location.hash='#tool-vlan'">
+                <div class="callout-icon"><i class="fa-solid fa-play-circle" style="color:var(--primary); font-size: 1.4rem;"></i></div>
+                <div class="callout-content">
+                    <h4 style="margin-bottom:0.2rem;">✨ Simulador Interactivo de VLANs Disponible</h4>
+                    <p>Prueba en tiempo real el nuevo <a href="#tool-vlan" style="color:var(--primary); font-weight:bold;">Simulador Animado de VLANs e IEEE 802.1Q</a> (disponible en Herramientas y en la Clase 5).</p>
+                </div>
+            </div>
+
             <h2><i class="fa-solid fa-layer-group"></i> Objetivos Teóricos de la Clase 1</h2>
             <p>Comprender la transmisión de datos mediante capas independientes utilizando los modelos de referencia estándar OSI y TCP/IP.</p>
 

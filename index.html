@@ -64,6 +64,12 @@
                 <div class="nav-section-title">Herramientas y Recursos</div>
                 <ul class="nav-list tools-list">
                     <li>
+                        <a href="#tool-vlan" class="nav-item" data-tool="vlan">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>Simulador Animado VLANs</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="#tool-subnet" class="nav-item" data-tool="subnet">
                             <i class="fa-solid fa-calculator"></i>
                             <span>Calculadora Subnetting</span>
@@ -186,7 +192,104 @@
                     </div>
                 </section>
 
-                <!-- VIEW 2: Subnetting Calculator Tool -->
+                <!-- VIEW 2: VLAN Interactive Animation Tool -->
+                <section class="view-section" id="view-tool-vlan">
+                    <div class="tool-header">
+                        <div class="tool-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <div>
+                            <h2>Simulador Interactivo de VLANs y Etiquetado IEEE 802.1Q</h2>
+                            <p>Visualiza el aislamiento de dominios de broadcast y el enrutamiento Inter-VLAN (Router-on-a-Stick) en tiempo real.</p>
+                        </div>
+                    </div>
+
+                    <div class="vlan-simulator-container" id="vlan-simulator-tool">
+                        <div class="vlan-controls">
+                            <button class="btn btn-outline btn-sm active" onclick="runVLANSimulation('same-vlan')">
+                                <i class="fa-solid fa-bullhorn"></i> 1. Broadcast en Misma VLAN (VLAN 10)
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="runVLANSimulation('cross-vlan-block')">
+                                <i class="fa-solid fa-ban"></i> 2. Bloqueo Capa 2 (VLAN 10 ➔ VLAN 20)
+                            </button>
+                            <button class="btn btn-outline btn-sm" onclick="runVLANSimulation('router-on-stick')">
+                                <i class="fa-solid fa-route"></i> 3. Inter-VLAN Routing (802.1Q Trunk)
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="resetVLANSimulation()">
+                                <i class="fa-solid fa-rotate-left"></i> Reiniciar
+                            </button>
+                        </div>
+
+                        <div class="vlan-status-banner" id="vlan-status-text">
+                            <i class="fa-solid fa-circle-info"></i> Selecciona un escenario arriba para iniciar la simulación animada.
+                        </div>
+
+                        <div class="vlan-topology-stage" id="vlan-stage">
+                            <svg class="vlan-cables-svg" id="vlan-cables-svg">
+                                <line id="cable-r1-sw1" class="vlan-cable trunk-cable" />
+                                <line id="cable-sw1-pc1" class="vlan-cable access-cable-10" />
+                                <line id="cable-sw1-pc2" class="vlan-cable access-cable-10" />
+                                <line id="cable-sw1-pc3" class="vlan-cable access-cable-20" />
+                                <line id="cable-sw1-pc4" class="vlan-cable access-cable-20" />
+                            </svg>
+                            <div class="vlan-device router-device" id="device-router">
+                                <i class="fa-solid fa-route device-icon"></i>
+                                <span class="device-name">Router (R1)</span>
+                                <span class="device-subnet">Subinterfaces .10 y .20</span>
+                            </div>
+
+                            <div class="vlan-device switch-device" id="device-switch">
+                                <i class="fa-solid fa-network-wired device-icon"></i>
+                                <span class="device-name">Switch (SW1)</span>
+                                <span class="device-subnet">Tabla de MACs & VLANs</span>
+                            </div>
+
+                            <div class="vlan-pcs-row">
+                                <div class="vlan-device pc-device vlan10-pc" id="device-pc1">
+                                    <i class="fa-solid fa-desktop device-icon"></i>
+                                    <span class="device-name">PC-1 (Ventas)</span>
+                                    <span class="vlan-tag-pill vlan10-pill">VLAN 10</span>
+                                    <span class="device-ip">192.168.10.10</span>
+                                </div>
+
+                                <div class="vlan-device pc-device vlan10-pc" id="device-pc2">
+                                    <i class="fa-solid fa-desktop device-icon"></i>
+                                    <span class="device-name">PC-2 (Ventas)</span>
+                                    <span class="vlan-tag-pill vlan10-pill">VLAN 10</span>
+                                    <span class="device-ip">192.168.10.11</span>
+                                </div>
+
+                                <div class="vlan-device pc-device vlan20-pc" id="device-pc3">
+                                    <i class="fa-solid fa-desktop device-icon"></i>
+                                    <span class="device-name">PC-3 (Finanzas)</span>
+                                    <span class="vlan-tag-pill vlan20-pill">VLAN 20</span>
+                                    <span class="device-ip">192.168.20.10</span>
+                                </div>
+
+                                <div class="vlan-device pc-device vlan20-pc" id="device-pc4">
+                                    <i class="fa-solid fa-desktop device-icon"></i>
+                                    <span class="device-name">PC-4 (Finanzas)</span>
+                                    <span class="vlan-tag-pill vlan20-pill">VLAN 20</span>
+                                    <span class="device-ip">192.168.20.11</span>
+                                </div>
+                            </div>
+
+                            <div class="vlan-packet hidden" id="vlan-packet">
+                                <span class="packet-tag" id="packet-tag-label">VID:10</span>
+                            </div>
+                        </div>
+
+                        <div class="vlan-packet-inspector" id="vlan-inspector">
+                            <h4><i class="fa-solid fa-magnifying-glass"></i> Inspección de Encabezado Ethernet (802.1Q Tag)</h4>
+                            <div class="frame-structure">
+                                <span class="frame-field">Destino: FF:FF:FF:FF:FF:FF</span>
+                                <span class="frame-field">Origen: MAC-PC1</span>
+                                <span class="frame-field tag-field" id="inspector-tag-field">IEEE 802.1Q (Sin Etiqueta / Access)</span>
+                                <span class="frame-field">Datos IP: 192.168.10.0/24</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: Subnetting Calculator Tool -->
                 <section class="view-section" id="view-tool-subnet">
                     <div class="tool-header">
                         <div class="tool-icon"><i class="fa-solid fa-calculator"></i></div>
