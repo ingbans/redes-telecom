@@ -258,16 +258,20 @@ function renderTopicView(topicId) {
     }
 
     // Auto-initialize class specific animations
-    if (topic.id === 'clase-1') {
-        resetOSISimulation();
-    } else if (topic.id === 'clase-3') {
-        setTimeout(updateSubnetVisualizer, 100);
-    } else if (topic.id === 'clase-5') {
+    if (topic.id === 'clase-1') initClase1Sim();
+    else if (topic.id === 'clase-2') initClase2Sim();
+    else if (topic.id === 'clase-3') initClase3Sim();
+    else if (topic.id === 'clase-5') {
         setTimeout(() => {
-            drawVLANCables();
+            drawTopologyCables('vlan-stage', { 'cable-r1-sw1': ['device-router', 'device-switch'], 'cable-sw1-pc1': ['device-switch', 'device-pc1'], 'cable-sw1-pc2': ['device-switch', 'device-pc2'], 'cable-sw1-pc3': ['device-switch', 'device-pc3'], 'cable-sw1-pc4': ['device-switch', 'device-pc4'] });
             runVLANSimulation('same-vlan');
         }, 150);
     }
+    else if (topic.id === 'clase-6') initClase6Sim();
+    else if (topic.id === 'clase-7') initClase7Sim();
+    else if (topic.id === 'clase-9') initClase9Sim();
+    else if (topic.id === 'clase-10') initClase10Sim();
+    else if (topic.id === 'clase-11') initClase11Sim();
 
     // Scroll to top of content
     window.scrollTo({ top: 0, behavior: 'smooth' });

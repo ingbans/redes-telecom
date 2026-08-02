@@ -1,6 +1,6 @@
 /* ==========================================================================
    ACADEMIC SYLLABUS DATA - TELECOM NETWORKS (12 CLASSES STRUCTURE)
-   Includes complete theoretical explanations and interactive animations for each class
+   Includes complete theoretical explanations and full graphical topology simulators for each class
    ========================================================================== */
 
 const courseTopicsData = [
@@ -14,30 +14,48 @@ const courseTopicsData = [
         description: "Fundamentos de telecomunicaciones, pila de protocolos de 7 y 4 capas, unidades de datos (PDU) y proceso de encapsulamiento.",
         content: `
             <h2><i class="fa-solid fa-layer-group"></i> Objetivos Teóricos de la Clase 1</h2>
-            <p>Comprender la transmisión de datos mediante capas independientes utilizando los modelos de referencia estándar OSI y TCP/IP, el flujo de PDU y las funciones específicas de cada nivel.</p>
+            <p>Comprender la transmisión de datos mediante capas independientes utilizando los modelos de referencia estándar OSI y TCP/IP, el flujo de PDU y el proceso de encapsulamiento.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Proceso de Encapsulamiento OSI</h2>
-            <p>Observa paso a paso cómo cada capa envuelve el mensaje agregando su propia información de control (Encabezado/PDU):</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Encapsulamiento y Topología OSI</h2>
+            <p>Utiliza los botones a continuación para simular la transmisión del paquete a través de la topología física:</p>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-primary btn-sm" onclick="runOSISimulation()"><i class="fa-solid fa-play"></i> Iniciar Encapsulamiento</button>
-                    <button class="btn btn-secondary btn-sm" onclick="resetOSISimulation()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
+                    <button class="btn btn-primary btn-sm active" onclick="runOSISimulation('encap')"><i class="fa-solid fa-play"></i> 1. Encapsulamiento en Emisor (PC-1 ➔ Red)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runOSISimulation('decap')"><i class="fa-solid fa-circle-check"></i> 2. Desencapsulamiento en Servidor</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase1Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="osi-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic en "Iniciar Encapsulamiento" para observar la construcción de la PDU en cada capa.
+                <div class="vlan-status-banner" id="c1-status">
+                    <i class="fa-solid fa-circle-info"></i> Selecciona un escenario arriba para iniciar la simulación animada.
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;" id="osi-layers-row">
-                    <div class="osi-layer-box" id="osi-l7">7. Aplicación</div>
-                    <div class="osi-layer-box" id="osi-l4">4. Transporte</div>
-                    <div class="osi-layer-box" id="osi-l3">3. Red</div>
-                    <div class="osi-layer-box" id="osi-l2">2. Enlace</div>
-                    <div class="osi-layer-box" id="osi-l1">1. Física</div>
+                <div class="vlan-topology-stage" id="c1-stage">
+                    <svg class="vlan-cables-svg"><line id="c1-c1" class="vlan-cable access-cable-10"/><line id="c1-c2" class="vlan-cable trunk-cable"/><line id="c1-c3" class="vlan-cable access-cable-20"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="c1-pc1">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-1 (Emisor)</span>
+                            <span class="device-ip">192.168.1.10</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c1-sw1">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">Switch (SW1)</span>
+                            <span class="device-subnet">Capa 2 Enlace</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c1-r1">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router (R1)</span>
+                            <span class="device-subnet">Capa 3 Red</span>
+                        </div>
+                        <div class="vlan-device pc-device vlan20-pc" id="c1-srv">
+                            <i class="fa-solid fa-server device-icon"></i>
+                            <span class="device-name">Servidor Web</span>
+                            <span class="device-ip">10.0.0.5</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c1-packet"><span class="packet-tag" id="c1-packet-tag">PDU</span></div>
                 </div>
                 <div class="vlan-packet-inspector">
                     <h4><i class="fa-solid fa-magnifying-glass"></i> Inspección de la PDU (Unidad de Datos de Protocolo)</h4>
-                    <div class="frame-structure" id="osi-pdu-preview">
-                        <span class="pdu-block data-block">DATOS (Mensaje HTTP)</span>
-                    </div>
+                    <div class="frame-structure" id="c1-pdu-preview"><span class="pdu-block data-block">DATOS (Mensaje HTTP)</span></div>
                 </div>
             </div>
 
@@ -86,20 +104,36 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-cable-car"></i> Objetivos Teóricos de la Clase 2</h2>
             <p>Analizar los medios de transmisión físicos (guiados y no guiados), la física de propagación de señales y el formato de la trama Ethernet II junto a la estructura de la dirección MAC de 48 bits.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Propagación en Medios y Desglose MAC</h2>
-            <p>Selecciona un medio físico de transmisión para observar el canal y la naturaleza de las señales en tiempo real:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Medios de Transmisión y Dirección MAC</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-outline btn-sm active" onclick="updateMediumSimulation('utp')"><i class="fa-solid fa-bolt"></i> Cobre UTP (Eléctrico)</button>
-                    <button class="btn btn-outline btn-sm" onclick="updateMediumSimulation('fiber')"><i class="fa-solid fa-lightbulb"></i> Fibra Óptica (Luz)</button>
-                    <button class="btn btn-outline btn-sm" onclick="updateMediumSimulation('wifi')"><i class="fa-solid fa-wifi"></i> Wi-Fi (Radiofrecuencia)</button>
+                    <button class="btn btn-outline btn-sm active" onclick="runMediumSimulation('utp')"><i class="fa-solid fa-bolt"></i> 1. Cobre UTP Cat 6 (Eléctrico)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runMediumSimulation('fiber')"><i class="fa-solid fa-lightbulb"></i> 2. Fibra Óptica (Luz Monomodo)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runMediumSimulation('wifi')"><i class="fa-solid fa-wifi"></i> 3. Wi-Fi 6 (Radiofrecuencia RF)</button>
                 </div>
-                <div class="vlan-status-banner" id="medium-status">
-                    <strong>Cobre UTP (Cat 6):</strong> Transmisión mediante impulsos eléctricos continuos de voltaje diferencial.
+                <div class="vlan-status-banner" id="c2-status">Selecciona un medio físico de transmisión arriba para observar la señal.</div>
+                <div class="vlan-topology-stage" id="c2-stage">
+                    <svg class="vlan-cables-svg"><line id="c2-c1" class="vlan-cable access-cable-10"/><line id="c2-c2" class="vlan-cable access-cable-10"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="c2-pc1">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-1 (Emisor)</span>
+                            <span class="vlan-tag-pill vlan10-pill">MAC: 00:1A:2B:44:55:66</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c2-sw1">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">Switch (SW1)</span>
+                            <span class="device-subnet">Canal de Transmisión</span>
+                        </div>
+                        <div class="vlan-device pc-device vlan20-pc" id="c2-pc2">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-2 (Receptor)</span>
+                            <span class="vlan-tag-pill vlan20-pill">MAC: CC:DD:EE:11:22:33</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c2-packet"><span class="packet-tag">MAC</span></div>
                 </div>
-                <div class="medium-wave-canvas wave-utp" id="medium-wave">
-                    ⚡ ⚡ ⚡ [Impulsos Eléctricos +5V / -5V en Pares Trenzados] ⚡ ⚡ ⚡
-                </div>
+                <div class="medium-wave-canvas wave-utp" id="c2-wave">⚡ ⚡ ⚡ [Impulsos Eléctricos +5V / -5V en Pares Trenzados] ⚡ ⚡ ⚡</div>
             </div>
 
             <h2><i class="fa-solid fa-network-wired"></i> Medios de Transmisión</h2>
@@ -112,7 +146,7 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-barcode"></i> Estructura de la Dirección MAC</h2>
             <p>Una dirección física MAC consta de 48 bits (6 bytes) expresados en notación hexadecimal:</p>
             <ul>
-                <li><strong>OUI (Organizationally Unique Identifier):</strong> Primeros 24 bits asignados por la IEEE para identificar al fabricante (Ej. 00:1A:2B).</li>
+                <li><strong>OUI (Organizationally Unique Identifier):</strong> Primeros 24 bits asignados por la IEEE para identificar al fabricante.</li>
                 <li><strong>Identificador de Dispositivo:</strong> Últimos 24 bits asignados de forma única por el fabricante para la tarjeta NIC.</li>
             </ul>
         `
@@ -129,27 +163,42 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-calculator"></i> Objetivos Teóricos de la Clase 3</h2>
             <p>Dominar la estructura matemática de 32 bits de las direcciones IPv4, las máscaras de longitud fija FLSM y el cálculo exacto de subredes mediante préstamos de bits CIDR.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Visual: División de Subredes IPv4 (CIDR /24 a /30)</h2>
-            <p>Cambia el prefijo de máscara CIDR para observar en tiempo real la cantidad de subredes generadas y hosts útiles por subred:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Topología de Subredes IPv4 (FLSM)</h2>
             <div class="vlan-simulator-container">
-                <div class="form-group" style="max-width:320px; margin-bottom:1rem;">
-                    <label>Prefijo CIDR:</label>
-                    <select id="vsubnet-cidr" class="att-status-select" onchange="updateSubnetVisualizer()">
-                        <option value="24">/24 - 255.255.255.0 (1 Subred de 254 Hosts)</option>
-                        <option value="25">/25 - 255.255.255.128 (2 Subredes de 126 Hosts)</option>
-                        <option value="26">/26 - 255.255.255.192 (4 Subredes de 62 Hosts)</option>
-                        <option value="27" selected>/27 - 255.255.255.224 (8 Subredes de 30 Hosts)</option>
-                        <option value="28">/28 - 255.255.255.240 (16 Subredes de 14 Hosts)</option>
-                        <option value="30">/30 - 255.255.255.252 (64 Subredes de 2 Hosts)</option>
+                <div class="vlan-controls">
+                    <label style="font-size:0.88rem; font-weight:bold; align-self:center;">Prefijo de Subred:</label>
+                    <select id="c3-cidr-select" class="att-status-select" onchange="runSubnetSimulation()">
+                        <option value="26">Subred 1 (/26 - 62 Hosts útiles)</option>
+                        <option value="27" selected>Subred 2 (/27 - 30 Hosts útiles)</option>
+                        <option value="30">Subred 3 (/30 - Enlace WAN Punto a Punto)</option>
                     </select>
                 </div>
-                <div class="vlan-status-banner">
-                    <strong>Máscara de Subred:</strong> <span id="vsubnet-mask">255.255.255.224</span> | 
-                    <strong>Hosts Útiles por Subred:</strong> <span id="vsubnet-hosts">30</span> | 
-                    <strong>Distribución de Bits:</strong> <span id="vsubnet-bits">27 Bits Red | 5 Bits Host</span>
-                </div>
-                <div class="subnet-blocks-grid" id="vsubnet-blocks-grid">
-                    <!-- Rendered dynamically -->
+                <div class="vlan-status-banner" id="c3-status">Selecciona una subred arriba para verificar el enrutamiento.</div>
+                <div class="vlan-topology-stage" id="c3-stage">
+                    <svg class="vlan-cables-svg"><line id="c3-c1" class="vlan-cable access-cable-10"/><line id="c3-c2" class="vlan-cable access-cable-20"/><line id="c3-c3" class="vlan-cable trunk-cable"/></svg>
+                    <div class="vlan-device router-device" id="c3-r1">
+                        <i class="fa-solid fa-route device-icon"></i>
+                        <span class="device-name">Router (R1)</span>
+                        <span class="device-subnet">192.168.1.0/24</span>
+                    </div>
+                    <div class="vlan-pcs-row" style="margin-top:1rem;">
+                        <div class="vlan-device switch-device" id="c3-sw1">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">SW-Ventas (/26)</span>
+                            <span class="vlan-tag-pill vlan10-pill">192.168.1.0/26</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c3-sw2">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">SW-Finanzas (/27)</span>
+                            <span class="vlan-tag-pill vlan20-pill">192.168.1.64/27</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c3-sw3">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">SW-WAN (/30)</span>
+                            <span class="vlan-tag-pill" style="background:#f59e0b; color:#fff;">10.0.0.0/30</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c3-packet"><span class="packet-tag">IP</span></div>
                 </div>
             </div>
 
@@ -191,7 +240,6 @@ const courseTopicsData = [
             <p>Evaluación escrita que abarca reactivos de selección múltiple, análisis de modelos de red (OSI vs TCP/IP), tramas Ethernet, direcciones MAC y desarrollo escrito de cálculos de Subnetting IPv4.</p>
 
             <h2><i class="fa-solid fa-circle-question"></i> Simulador Interactivo: Diagnóstico Rápido Pre-Examen 1</h2>
-            <p>Responde las siguientes preguntas de práctica antes de presentar el examen escrito:</p>
             <div class="vlan-simulator-container">
                 <div class="diag-quiz-box">
                     <div class="diag-question">
@@ -210,7 +258,7 @@ const courseTopicsData = [
                 <div class="callout-icon"><i class="fa-solid fa-circle-info"></i></div>
                 <div class="callout-content">
                     <h4>Escala de Calificación Oficial:</h4>
-                    <p>Este examen parcial se califica estrictamente en una escala de <strong>0 a 20 puntos</strong>. Mínimo aprobatorio: <strong>10 pts</strong>.</p>
+                    <p>Este examen parcial se califica en escala de <strong>0 a 20 puntos</strong>. Mínimo aprobatorio: <strong>10 pts</strong>.</p>
                 </div>
             </div>
         `
@@ -228,8 +276,6 @@ const courseTopicsData = [
             <p>Comprender el aislamiento de dominios de broadcast mediante VLANs, la inclusión del tag IEEE 802.1Q en enlaces troncales y el enrutamiento Inter-VLAN (Router-on-a-Stick).</p>
 
             <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Operación de VLANs y Tag 802.1Q</h2>
-            <p>Utiliza los botones a continuación para observar cómo el switch aísla el tráfico entre VLANs y cómo el Router interconecta ambas VLANs en Capa 3:</p>
-
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
                     <button class="btn btn-outline btn-sm active" onclick="runVLANSimulation('same-vlan')">
@@ -241,19 +287,9 @@ const courseTopicsData = [
                     <button class="btn btn-outline btn-sm" onclick="runVLANSimulation('router-on-stick')">
                         <i class="fa-solid fa-route"></i> 3. Inter-VLAN Routing (802.1Q Trunk)
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="resetVLANSimulation()">
-                        <i class="fa-solid fa-rotate-left"></i> Reiniciar
-                    </button>
                 </div>
-
-                <!-- Status Box -->
-                <div class="vlan-status-banner" id="vlan-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Selecciona un escenario arriba para iniciar la animación interactiva.
-                </div>
-
-                <!-- Graphical Topology Canvas -->
+                <div class="vlan-status-banner" id="vlan-status-text">Selecciona un escenario arriba para iniciar la simulación animada.</div>
                 <div class="vlan-topology-stage" id="vlan-stage">
-                    <!-- SVG Cables Layer -->
                     <svg class="vlan-cables-svg" id="vlan-cables-svg">
                         <line id="cable-r1-sw1" class="vlan-cable trunk-cable" />
                         <line id="cable-sw1-pc1" class="vlan-cable access-cable-10" />
@@ -303,26 +339,11 @@ const courseTopicsData = [
                         </div>
                     </div>
 
-                    <!-- Animated Data Packet Dot -->
                     <div class="vlan-packet hidden" id="vlan-packet">
                         <span class="packet-tag" id="packet-tag-label">VID:10</span>
                     </div>
                 </div>
-
-                <!-- Packet Inspector Panel -->
-                <div class="vlan-packet-inspector" id="vlan-inspector">
-                    <h4><i class="fa-solid fa-magnifying-glass"></i> Inspección de Encabezado Ethernet (802.1Q Tag)</h4>
-                    <div class="frame-structure">
-                        <span class="frame-field">Destino: FF:FF:FF:FF:FF:FF</span>
-                        <span class="frame-field">Origen: MAC-PC1</span>
-                        <span class="frame-field tag-field" id="inspector-tag-field">IEEE 802.1Q (Sin Etiqueta / Access)</span>
-                        <span class="frame-field">Datos IP: 192.168.10.0/24</span>
-                    </div>
-                </div>
             </div>
-
-            <h2><i class="fa-solid fa-link"></i> Enlaces Troncales y Etiquetado IEEE 802.1Q</h2>
-            <p>Un enlace troncal (Trunk) transporta tráfico de múltiples VLANs a través de un único enlace físico. El protocolo estándar <strong>IEEE 802.1Q</strong> inserta un campo de encabezado de 4 bytes en la trama Ethernet que incluye el <strong>VLAN ID (VID)</strong> de 12 bits (permitiendo hasta 4,096 VLANs).</p>
         `
     },
     {
@@ -337,36 +358,36 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-rotate"></i> Objetivos Teóricos de la Clase 6</h2>
             <p>Analizar la prevención de bucles de conmutación en Capa 2 mediante el algoritmo de Spanning Tree Protocol (IEEE 802.1D) y la regla de selección de ruta por el prefijo más largo (Longest Prefix Match) en la tabla de enrutamiento IP.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Elección Root Bridge y Bloqueo de Bucles (STP)</h2>
-            <p>Simula la convergencia del algoritmo Spanning Tree en una topología en triángulo de 3 switches:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Convergencia STP y Falla de Enlace</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-primary btn-sm" onclick="runSTPSimulation()"><i class="fa-solid fa-play"></i> Iniciar Algoritmo STP</button>
+                    <button class="btn btn-primary btn-sm active" onclick="runSTPSimulation('converge')"><i class="fa-solid fa-play"></i> 1. Convergencia STP (Puerto Bloqueado BLK)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runSTPSimulation('failover')"><i class="fa-solid fa-bolt"></i> 2. Simular Falla de Enlace & Reconvergencia</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase6Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="stp-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic en "Iniciar Algoritmo STP" para calcular el Root Bridge (menor Prioridad/BID) y el puerto bloqueado (BLK).
-                </div>
-                <div class="vlan-pcs-row" style="margin-top:1rem;">
-                    <div class="vlan-device switch-device" id="stp-sw1">
-                        <i class="fa-solid fa-crown" style="color:#f59e0b;"></i>
-                        <span class="device-name">SW-1 (Prioridad 4096)</span>
-                        <span class="device-subnet">Root Bridge Ganador</span>
+                <div class="vlan-status-banner" id="c6-status">Haz clic en un escenario arriba para evaluar el algoritmo STP.</div>
+                <div class="vlan-topology-stage" id="c6-stage">
+                    <svg class="vlan-cables-svg"><line id="c6-c1" class="vlan-cable trunk-cable"/><line id="c6-c2" class="vlan-cable trunk-cable"/><line id="c6-c3" class="vlan-cable trunk-cable"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device switch-device" id="c6-sw1">
+                            <i class="fa-solid fa-crown" style="color:#f59e0b;"></i>
+                            <span class="device-name">SW-1 (Root Bridge)</span>
+                            <span class="vlan-tag-pill vlan10-pill">BID: 4096</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c6-sw2">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">SW-2 (Designated)</span>
+                            <span class="vlan-tag-pill vlan20-pill">BID: 32768</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c6-sw3">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">SW-3 (Blocked Port)</span>
+                            <span class="vlan-tag-pill" style="background:#ef4444; color:#fff;">BLK Port</span>
+                        </div>
                     </div>
-                    <div class="vlan-device switch-device" id="stp-sw2">
-                        <i class="fa-solid fa-network-wired device-icon"></i>
-                        <span class="device-name">SW-2 (Prioridad 32768)</span>
-                        <span class="device-subnet">Designated Switch</span>
-                    </div>
-                    <div class="vlan-device switch-device" id="stp-sw3">
-                        <i class="fa-solid fa-network-wired device-icon"></i>
-                        <span class="device-name">SW-3 (Prioridad 32768)</span>
-                        <span class="device-subnet">Puerto Bloqueado (BLK)</span>
-                    </div>
+                    <div class="vlan-packet hidden" id="c6-packet"><span class="packet-tag">BPDU</span></div>
                 </div>
             </div>
-
-            <h2><i class="fa-solid fa-route"></i> Operación de la Tabla de Enrutamiento</h2>
-            <p>La tabla de enrutamiento IP contiene las rutas conocidas por el router. Cuando un paquete ingresa, el router busca la entrada con el prefijo de máscara más específico (Longest Prefix Match) para determinar el siguiente salto (Next-Hop).</p>
         `
     },
     {
@@ -381,22 +402,41 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-diagram-next"></i> Objetivos Teóricos de la Clase 7</h2>
             <p>Estudiar la construcción de la base de datos de estado de enlace (LSDB), la formación de adyacencias mediante paquetes Hello y el cálculo de la ruta óptima mediante el algoritmo Dijkstra (SPF).</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Enrutamiento Dinámico OSPFv2 (Dijkstra SPF)</h2>
-            <p>Calcula la mejor ruta basada en la métrica acumulada de costo de ancho de banda:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Algoritmo Dijkstra OSPFv2 (Área 0)</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-primary btn-sm" onclick="runOSPFSimulation()"><i class="fa-solid fa-calculator"></i> Calcular Ruta Más Corta (Dijkstra)</button>
+                    <button class="btn btn-outline btn-sm active" onclick="runOSPFSimulation('hello')"><i class="fa-solid fa-handshake"></i> 1. Paquetes Hello (224.0.0.5)</button>
+                    <button class="btn btn-primary btn-sm" onclick="runOSPFSimulation('dijkstra')"><i class="fa-solid fa-calculator"></i> 2. Ruta Óptima SPF (Dijkstra)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase7Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="ospf-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic en "Calcular Ruta Más Corta" para evaluar la métrica de costo OSPF basadas en ancho de banda.
-                </div>
-                <div class="vlan-packet-inspector" id="ospf-path-info">
-                    <strong>Métrica de Costo OSPF:</strong> Costo = 100 Mbps / Ancho de Banda del Enlace.
+                <div class="vlan-status-banner" id="c7-status">Selecciona un escenario arriba para evaluar el algoritmo OSPF.</div>
+                <div class="vlan-topology-stage" id="c7-stage">
+                    <svg class="vlan-cables-svg"><line id="c7-c1" class="vlan-cable access-cable-10"/><line id="c7-c2" class="vlan-cable access-cable-10"/><line id="c7-c3" class="vlan-cable trunk-cable"/><line id="c7-c4" class="vlan-cable trunk-cable"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device router-device" id="c7-r1">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router R1</span>
+                            <span class="vlan-tag-pill vlan10-pill">Gigabit (Costo 10)</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c7-r2">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router R2</span>
+                            <span class="vlan-tag-pill vlan10-pill">Gigabit (Costo 10)</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c7-r3">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router R3</span>
+                            <span class="vlan-tag-pill" style="background:#ef4444; color:#fff;">Slow (Costo 100)</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c7-r4">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router R4</span>
+                            <span class="vlan-tag-pill vlan20-pill">Destino OSPF</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c7-packet"><span class="packet-tag">LSA</span></div>
                 </div>
             </div>
-
-            <h2><i class="fa-solid fa-gears"></i> Métrica del Costo OSPF</h2>
-            <p>OSPF calcula el costo de cada interfaz según la relación: <code>Costo = Ancho de Banda de Referencia (100 Mbps) / Ancho de Banda de la Interfaz</code>.</p>
         `
     },
     {
@@ -419,7 +459,6 @@ const courseTopicsData = [
                         <div class="diag-opts">
                             <button class="diag-opt-btn" onclick="checkDiagnosticAnswer(this, true, 'El campo VLAN ID (VID) de 12 bits identifica la VLAN de la trama.')">VLAN ID (VID) de 12 bits</button>
                             <button class="diag-opt-btn" onclick="checkDiagnosticAnswer(this, false, 'El campo TTL pertenece a la cabecera IP de Capa 3.')">Time To Live (TTL)</button>
-                            <button class="diag-opt-btn" onclick="checkDiagnosticAnswer(this, false, 'El campo FCS está al final de la trama para errores.')">Frame Check Sequence (FCS)</button>
                         </div>
                         <div class="diag-exp-box"></div>
                     </div>
@@ -430,7 +469,7 @@ const courseTopicsData = [
                 <div class="callout-icon"><i class="fa-solid fa-circle-info"></i></div>
                 <div class="callout-content">
                     <h4>Escala de Calificación Oficial:</h4>
-                    <p>Este examen parcial se califica estrictamente en una escala de <strong>0 a 20 puntos</strong>. Mínimo aprobatorio: <strong>10 pts</strong>.</p>
+                    <p>Este examen parcial se califica en escala de <strong>0 a 20 puntos</strong>. Mínimo aprobatorio: <strong>10 pts</strong>.</p>
                 </div>
             </div>
         `
@@ -447,21 +486,41 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-shield-halved"></i> Objetivos Teóricos de la Clase 9</h2>
             <p>Comprender el funcionamiento de las Listas de Control de Acceso (ACL) para inspección y filtrado de paquetes IP en Capa 3 y Capa 4 (puertos TCP/UDP).</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Evaluación de Reglas de Filtrado ACL</h2>
-            <p>Prueba diferentes tipos de tráfico para observar el comportamiento de las sentencias Permit / Deny:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Filtrado de Paquetes ACL 101 (Firewall)</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-outline btn-sm" onclick="testACLPacket('web')"><i class="fa-solid fa-globe"></i> Probar Tráfico Web (Port 80)</button>
-                    <button class="btn btn-outline btn-sm" onclick="testACLPacket('ssh')"><i class="fa-solid fa-terminal"></i> Probar SSH (Port 22)</button>
-                    <button class="btn btn-outline btn-sm" onclick="testACLPacket('icmp')"><i class="fa-solid fa-wifi"></i> Probar Ping (ICMP)</button>
+                    <button class="btn btn-outline btn-sm active" onclick="runACLSimulation('web')"><i class="fa-solid fa-globe"></i> 1. Tráfico HTTP (Puerto 80 - Permitido)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runACLSimulation('ssh')"><i class="fa-solid fa-terminal"></i> 2. Tráfico SSH (Puerto 22 - Denegado)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase9Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="acl-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Selecciona un paquete de prueba arriba para pasarlo a través de la lista de acceso.
+                <div class="vlan-status-banner" id="c9-status">Selecciona un tipo de paquete de prueba arriba para inspeccionar la ACL.</div>
+                <div class="vlan-topology-stage" id="c9-stage">
+                    <svg class="vlan-cables-svg"><line id="c9-c1" class="vlan-cable access-cable-10"/><line id="c9-c2" class="vlan-cable access-cable-20"/><line id="c9-c3" class="vlan-cable trunk-cable"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="c9-pc1">
+                            <i class="fa-solid fa-user-shield device-icon"></i>
+                            <span class="device-name">PC Admin</span>
+                            <span class="vlan-tag-pill vlan10-pill">192.168.1.10</span>
+                        </div>
+                        <div class="vlan-device pc-device vlan20-pc" id="c9-pc2">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC Invitado</span>
+                            <span class="vlan-tag-pill vlan20-pill">192.168.1.50</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c9-r1">
+                            <i class="fa-solid fa-shield-halved device-icon" style="color:var(--danger);"></i>
+                            <span class="device-name">Router Firewall</span>
+                            <span class="vlan-tag-pill" style="background:var(--danger); color:#fff;">ACL 101</span>
+                        </div>
+                        <div class="vlan-device pc-device" id="c9-srv">
+                            <i class="fa-solid fa-server device-icon"></i>
+                            <span class="device-name">Servidor Web/SSH</span>
+                            <span class="device-ip">10.0.0.5</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c9-packet"><span class="packet-tag">ACL</span></div>
                 </div>
             </div>
-
-            <h2><i class="fa-solid fa-filter"></i> Regla del Deny Implícito en ACLs</h2>
-            <p>Al final de toda Lista de Control de Acceso existe una regla invisible de denegación implícita (<code>deny ip any any</code>) que descarta todo paquete que no haya coincidido con ninguna regla previa.</p>
         `
     },
     {
@@ -476,24 +535,45 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-globe"></i> Objetivos Teóricos de la Clase 10</h2>
             <p>Dominar la conservación de direcciones lógicas mediante NAT/PAT Overload y la estructura de 128 bits en hexadecimal de IPv6 junto a la autoconfiguración SLAAC.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Tabla de Traducción NAT PAT (Overload)</h2>
-            <p>Envía peticiones desde clientes internos con IP privada para observar la tabla de mapeo dinámico NAT:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Tabla NAT / PAT Overload & IPv6 SLAAC</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-primary btn-sm" onclick="runNATSimulation()"><i class="fa-solid fa-bolt"></i> Enviar Petición HTTP desde PC Interna</button>
+                    <button class="btn btn-outline btn-sm active" onclick="runNATSimulation('pat')"><i class="fa-solid fa-bolt"></i> 1. PAT Overload (Mapeo de Puerto Privado ➔ Público)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runNATSimulation('slaac')"><i class="fa-solid fa-network-wired"></i> 2. Autoconfiguración IPv6 SLAAC</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase10Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="nat-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic para enviar un paquete desde la LAN privada hacia Internet.
+                <div class="vlan-status-banner" id="c10-status">Haz clic en un escenario arriba para iniciar la simulación NAT.</div>
+                <div class="vlan-topology-stage" id="c10-stage">
+                    <svg class="vlan-cables-svg"><line id="c10-c1" class="vlan-cable access-cable-10"/><line id="c10-c2" class="vlan-cable access-cable-10"/><line id="c10-c3" class="vlan-cable trunk-cable"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="c10-pc1">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-LAN 1</span>
+                            <span class="vlan-tag-pill vlan10-pill">192.168.1.10:50123</span>
+                        </div>
+                        <div class="vlan-device pc-device vlan10-pc" id="c10-pc2">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">PC-LAN 2</span>
+                            <span class="vlan-tag-pill vlan10-pill">192.168.1.11:50124</span>
+                        </div>
+                        <div class="vlan-device router-device" id="c10-r1">
+                            <i class="fa-solid fa-route device-icon"></i>
+                            <span class="device-name">Router NAT</span>
+                            <span class="vlan-tag-pill" style="background:#f59e0b; color:#fff;">IP Pública: 200.1.1.1</span>
+                        </div>
+                        <div class="vlan-device pc-device vlan20-pc" id="c10-web">
+                            <i class="fa-solid fa-cloud device-icon"></i>
+                            <span class="device-name">Servidor Internet</span>
+                            <span class="device-ip">8.8.8.8</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c10-packet"><span class="packet-tag">NAT</span></div>
                 </div>
-                <div class="custom-table-container" style="margin-top:1rem;">
-                    <table class="custom-table">
-                        <thead>
-                            <tr><th>Tipo de Dirección NAT</th><th>Dirección IP : Puerto</th></tr>
-                        </thead>
-                        <tbody id="nat-table-body">
-                            <tr><td>Inside Global</td><td>Esperando tráfico...</td></tr>
-                            <tr><td>Inside Local</td><td>Esperando tráfico...</td></tr>
-                        </tbody>
+                <div class="vlan-packet-inspector">
+                    <h4><i class="fa-solid fa-table"></i> Tabla de Traducción de Direcciones NAT PAT (Router)</h4>
+                    <table class="custom-table" style="margin:0;">
+                        <thead><tr><th>Tipo Dirección</th><th>IP : Puerto</th></tr></thead>
+                        <tbody id="c10-nat-table"><tr><td>Inside Global</td><td>200.1.1.1:50123</td></tr><tr><td>Inside Local</td><td>192.168.1.10:50123</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -511,14 +591,39 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-server"></i> Objetivos Teóricos de la Clase 11</h2>
             <p>Comprender la autoconfiguración IP cliente mediante el proceso DORA de DHCP, la resolución jerárquica de nombres DNS y la arquitectura SDN con separación de planos de control y datos.</p>
 
-            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Proceso DORA en DHCP</h2>
-            <p>Simula el intercambio de 4 mensajes para obtener una dirección IP dinámica:</p>
+            <h2><i class="fa-solid fa-play-circle"></i> Simulador Interactivo: Servicios de Red DHCP DORA & DNS</h2>
             <div class="vlan-simulator-container">
                 <div class="vlan-controls">
-                    <button class="btn btn-primary btn-sm" onclick="runDORASimulation()"><i class="fa-solid fa-play"></i> Iniciar Proceso DORA</button>
+                    <button class="btn btn-outline btn-sm active" onclick="runServicesSimulation('dora')"><i class="fa-solid fa-play"></i> 1. Proceso DHCP DORA (Solicitud de IP)</button>
+                    <button class="btn btn-outline btn-sm" onclick="runServicesSimulation('dns')"><i class="fa-solid fa-magnifying-glass"></i> 2. Consulta DNS (Resolución de Nombre)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="initClase11Sim()"><i class="fa-solid fa-rotate-left"></i> Reiniciar</button>
                 </div>
-                <div class="vlan-status-banner" id="dhcp-status-text">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic en "Iniciar Proceso DORA" para simular la asignación dinámica de dirección IP.
+                <div class="vlan-status-banner" id="c11-status">Haz clic en un escenario arriba para iniciar la animación de servicios.</div>
+                <div class="vlan-topology-stage" id="c11-stage">
+                    <svg class="vlan-cables-svg"><line id="c11-c1" class="vlan-cable access-cable-10"/><line id="c11-c2" class="vlan-cable trunk-cable"/><line id="c11-c3" class="vlan-cable access-cable-20"/></svg>
+                    <div class="vlan-pcs-row">
+                        <div class="vlan-device pc-device vlan10-pc" id="c11-pc1">
+                            <i class="fa-solid fa-desktop device-icon"></i>
+                            <span class="device-name">Cliente PC</span>
+                            <span class="device-ip">DHCP Client</span>
+                        </div>
+                        <div class="vlan-device switch-device" id="c11-sw1">
+                            <i class="fa-solid fa-network-wired device-icon"></i>
+                            <span class="device-name">Switch (SW1)</span>
+                            <span class="device-subnet">Capa 2</span>
+                        </div>
+                        <div class="vlan-device pc-device" id="c11-dhcp">
+                            <i class="fa-solid fa-server device-icon" style="color:var(--primary);"></i>
+                            <span class="device-name">Servidor DHCP</span>
+                            <span class="device-ip">192.168.1.1</span>
+                        </div>
+                        <div class="vlan-device pc-device" id="c11-dns">
+                            <i class="fa-solid fa-globe device-icon" style="color:var(--accent);"></i>
+                            <span class="device-name">Servidor DNS</span>
+                            <span class="device-ip">8.8.8.8</span>
+                        </div>
+                    </div>
+                    <div class="vlan-packet hidden" id="c11-packet"><span class="packet-tag">DORA</span></div>
                 </div>
             </div>
         `
