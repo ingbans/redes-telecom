@@ -81,6 +81,18 @@
                             <span>Simulador de Quizzes</span>
                         </a>
                     </li>
+                    <li id="nav-item-student" class="hidden">
+                        <a href="#portal-student" class="nav-item" data-tool="portal-student">
+                            <i class="fa-solid fa-id-card"></i>
+                            <span>Mi Portal Estudiante</span>
+                        </a>
+                    </li>
+                    <li id="nav-item-teacher" class="hidden">
+                        <a href="#portal-teacher" class="nav-item" data-tool="portal-teacher">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>Panel de Profesor (Admin)</span>
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="nav-section-title">Clases del Curso (12 Semanas)</div>
@@ -112,7 +124,10 @@
                     </div>
                 </div>
 
-                <div class="navbar-right">
+                <div class="navbar-right" style="display:flex; align-items:center; gap:1rem;">
+                    <div id="navbar-user-area">
+                        <!-- Populated by portal-system.js -->
+                    </div>
                     <button class="btn-theme-toggle" id="theme-toggle-btn" title="Cambiar tema">
                         <i class="fa-solid fa-moon theme-icon-dark"></i>
                         <i class="fa-solid fa-sun theme-icon-light"></i>
@@ -334,21 +349,267 @@
 
 
 
-                <!-- Search Results Overlay View -->
-                <section class="view-section" id="view-search-results">
+                <!-- VIEW 6: Student Portal View -->
+                <section class="view-section" id="view-portal-student">
                     <div class="tool-header">
-                        <div class="tool-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <div class="tool-icon" style="background: linear-gradient(135deg, var(--accent), var(--primary));"><i class="fa-solid fa-user-graduate"></i></div>
                         <div>
-                            <h2>Resultados de Búsqueda</h2>
-                            <p id="search-query-display">Mostrando resultados para: ""</p>
+                            <h2 id="std-profile-name">Portal del Estudiante</h2>
+                            <p id="std-profile-id">Consultar tus asistencias por clase y tus calificaciones de exámenes.</p>
                         </div>
                     </div>
-                    <div class="search-results-list" id="search-results-list">
-                        <!-- Populated dynamically -->
+
+                    <div class="subnet-calc-grid" style="margin-bottom: 2rem;">
+                        <div class="calc-card" style="background: var(--bg-tertiary);">
+                            <span class="res-label">Asistencia Acumulada:</span>
+                            <h2 id="std-attendance-percent" style="color: var(--accent); font-size: 1.8rem; margin-top:0.25rem;">0%</h2>
+                        </div>
+                        <div class="calc-card" style="background: var(--bg-tertiary);">
+                            <span class="res-label">Promedio de Calificaciones:</span>
+                            <h2 id="std-grade-avg" style="color: var(--primary); font-size: 1.8rem; margin-top:0.25rem;">-</h2>
+                            <small id="std-grade-status" style="font-weight: bold;">En curso</small>
+                        </div>
+                    </div>
+
+                    <div class="calc-card" style="margin-bottom: 2rem;">
+                        <h3><i class="fa-solid fa-graduation-cap"></i> Mis Calificaciones de Exámenes (Escala 0-20)</h3>
+                        <div class="custom-table-container">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Examen</th>
+                                        <th>Fecha / Programación</th>
+                                        <th>Calificación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Examen Parcial 1</strong></td>
+                                        <td>Clase 4</td>
+                                        <td><strong id="std-grade-ex1">Pendiente</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Examen Parcial 2</strong></td>
+                                        <td>Clase 8</td>
+                                        <td><strong id="std-grade-ex2">Pendiente</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Examen Parcial 3 / Final</strong></td>
+                                        <td>Clase 12</td>
+                                        <td><strong id="std-grade-ex3">Pendiente</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="calc-card">
+                        <h3><i class="fa-solid fa-calendar-check"></i> Historial de Asistencia por Fecha de Clase</h3>
+                        <div class="custom-table-container">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>Semana / Clase</th>
+                                        <th>Tema Impartido</th>
+                                        <th>Fecha Asignada</th>
+                                        <th>Estado de Asistencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="std-attendance-tbody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 7: Teacher Admin Control Panel -->
+                <section class="view-section" id="view-portal-teacher">
+                    <div class="tool-header">
+                        <div class="tool-icon" style="background: linear-gradient(135deg, var(--secondary), var(--primary));"><i class="fa-solid fa-user-tie"></i></div>
+                        <div>
+                            <h2>Panel de Control del Profesor / Administrador</h2>
+                            <p>Asignar fechas del calendario de clases, tomar asistencias, cargar calificaciones y gestionar la nómina de alumnos.</p>
+                        </div>
+                    </div>
+
+                    <div class="teacher-tabs-nav">
+                        <button class="teacher-tab-btn active" data-tab="tab-teacher-calendar"><i class="fa-solid fa-calendar-days"></i> 1. Calendario de Clases</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-attendance"><i class="fa-solid fa-clipboard-user"></i> 2. Tomar Asistencias</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-grades"><i class="fa-solid fa-pen-to-square"></i> 3. Cargar Calificaciones</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-roster"><i class="fa-solid fa-users-gear"></i> 4. Nómina de Alumnos & Respaldos</button>
+                    </div>
+
+                    <!-- TAB 1: Calendar Config -->
+                    <div class="teacher-tab-content active" id="tab-teacher-calendar">
+                        <div class="calc-card">
+                            <h3><i class="fa-solid fa-calendar-plus"></i> Asignar Fechas de Clases para el Semestre</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Selecciona la fecha calendario real en la que se impartirá cada una de las 12 clases:</p>
+                            <div id="teacher-calendar-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Attendance -->
+                    <div class="teacher-tab-content" id="tab-teacher-attendance">
+                        <div class="calc-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                                <h3><i class="fa-solid fa-clipboard-check"></i> Registro de Asistencias</h3>
+                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                    <label><strong>Seleccionar Clase:</strong></label>
+                                    <select id="att-class-select" class="att-status-select">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="custom-table-container">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre del Estudiante</th>
+                                            <th>Cédula / Carnet</th>
+                                            <th>Estado de Asistencia</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-att-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: Grades -->
+                    <div class="teacher-tab-content" id="tab-teacher-grades">
+                        <div class="calc-card">
+                            <h3><i class="fa-solid fa-award"></i> Registro de Calificaciones (Escala 0 - 20)</h3>
+                            <p style="color: var(--text-secondary); margin-bottom:1rem;">Ingresa la calificación obtenida por cada alumno en los 3 exámenes parciales. Las notas se guardan automáticamente:</p>
+
+                            <div class="custom-table-container">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Estudiante</th>
+                                            <th>Cédula / Carnet</th>
+                                            <th>Examen 1 (Clase 4)</th>
+                                            <th>Examen 2 (Clase 8)</th>
+                                            <th>Examen 3 (Clase 12)</th>
+                                            <th>Promedio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-grades-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: Roster & Backup -->
+                    <div class="teacher-tab-content" id="tab-teacher-roster">
+                        <div class="calc-card" style="margin-bottom: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                                <h3><i class="fa-solid fa-users"></i> Alumnos Registrados</h3>
+                                <button class="btn btn-primary btn-sm" onclick="exportPortalDataJSON()">
+                                    <i class="fa-solid fa-download"></i> Descargar Respaldo JSON
+                                </button>
+                            </div>
+                            <div class="custom-table-container" style="margin-top:1rem;">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre Completo</th>
+                                            <th>Correo Electrónico</th>
+                                            <th>Cédula / Carnet</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-roster-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
             </main>
+        </div>
+    </div>
+
+    <!-- Portal Auth Modals -->
+    <div class="portal-modal-overlay hidden" id="portal-modal-overlay">
+        <!-- LOGIN BOX -->
+        <div class="portal-modal-box hidden" id="modal-box-login">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión</h3>
+                <button class="modal-close-btn" onclick="closePortalModals()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="portal-login-form">
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>Tipo de Usuario:</label>
+                    <div style="display:flex; gap:1rem; margin-top:0.3rem;">
+                        <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="login-role" value="student" checked onclick="document.getElementById('teacher-login-fields').classList.add('hidden'); document.getElementById('student-login-fields').classList.remove('hidden');"> Estudiante</label>
+                        <label style="font-weight:normal; cursor:pointer;"><input type="radio" name="login-role" value="teacher" onclick="document.getElementById('student-login-fields').classList.add('hidden'); document.getElementById('teacher-login-fields').classList.remove('hidden');"> Profesor / Admin</label>
+                    </div>
+                </div>
+
+                <div id="student-login-fields">
+                    <div class="form-group">
+                        <label>Correo Electrónico:</label>
+                        <input type="email" id="login-email" placeholder="ejemplo@universidad.edu">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña:</label>
+                        <input type="password" id="login-password" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div id="teacher-login-fields" class="hidden">
+                    <div class="form-group">
+                        <label>Clave Maestra del Profesor:</label>
+                        <input type="password" id="login-teacher-pin" placeholder="Clave de Profesor (Por defecto: profesor2026)">
+                        <small style="color:var(--text-muted); display:block; margin-top:0.25rem;">Clave por defecto: <code>profesor2026</code></small>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-3">Ingresar al Portal</button>
+                <div class="text-center mt-3" style="font-size:0.85rem;">
+                    ¿Eres alumno y no tienes cuenta? <a href="#" onclick="openRegisterModal(); return false;" style="color:var(--primary);">Regístrate aquí</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- REGISTER BOX -->
+        <div class="portal-modal-box hidden" id="modal-box-register">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Registro de Estudiante</h3>
+                <button class="modal-close-btn" onclick="closePortalModals()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="student-register-form">
+                <div class="form-group">
+                    <label>Nombre Completo:</label>
+                    <input type="text" id="reg-name" required placeholder="Ej. Carlos Mendoza">
+                </div>
+                <div class="form-group">
+                    <label>Cédula de Identidad / Carnet:</label>
+                    <input type="text" id="reg-id" required placeholder="Ej. 28.123.456">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico:</label>
+                    <input type="email" id="reg-email" required placeholder="ejemplo@universidad.edu">
+                </div>
+                <div class="form-group">
+                    <label>Crear Contraseña:</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block mt-3">Crear Cuenta de Estudiante</button>
+                <div class="text-center mt-3" style="font-size:0.85rem;">
+                    ¿Ya tienes cuenta? <a href="#" onclick="openLoginModal(); return false;" style="color:var(--primary);">Iniciar Sesión</a>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -357,6 +618,7 @@
     <script src="js/commands-db.js"></script>
     <script src="js/subnet-calc.js"></script>
     <script src="js/quiz-engine.js"></script>
+    <script src="js/portal-system.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

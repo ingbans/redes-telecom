@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCLICheatsheet();
     initSubnetCalculator();
     initQuizEngine();
+    initPortalSystem();
     updateProgressTracker();
 });
 
@@ -184,6 +185,18 @@ function handleHashChange() {
             const bcCurrent = document.getElementById('bc-current');
             if (bcCurrent) bcCurrent.textContent = getToolTitle(toolName);
         }
+    } else if (hash === '#portal-student') {
+        renderStudentPortal();
+        const view = document.getElementById('view-portal-student');
+        if (view) view.classList.add('active');
+        const bcCurrent = document.getElementById('bc-current');
+        if (bcCurrent) bcCurrent.textContent = 'Mi Portal Estudiante';
+    } else if (hash === '#portal-teacher') {
+        renderTeacherPanel();
+        const view = document.getElementById('view-portal-teacher');
+        if (view) view.classList.add('active');
+        const bcCurrent = document.getElementById('bc-current');
+        if (bcCurrent) bcCurrent.textContent = 'Panel Profesor (Admin)';
     }
 }
 
