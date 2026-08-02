@@ -1,6 +1,6 @@
 /* ==========================================================================
    UI COMPONENTS & TOOLS STYLESHEET
-   Course: Telecom Networks (Cisco CCNA 200-301)
+   Course: Telecom Networks
    ========================================================================== */
 
 /* Topic Article Styling */
@@ -95,7 +95,7 @@
     font-size: 0.9rem;
 }
 
-/* Cisco CLI Terminal Code Block */
+/* CLI Terminal Code Block */
 .code-block-wrapper {
     position: relative;
     background-color: var(--code-bg);
@@ -161,7 +161,7 @@
     font-family: 'Fira Code', monospace;
 }
 
-/* Cisco CLI Syntax Highlights */
+/* CLI Syntax Highlights */
 .cli-prompt { color: #f43f5e; font-weight: bold; }
 .cli-cmd { color: #38bdf8; font-weight: bold; }
 .cli-param { color: #a78bfa; }
@@ -346,7 +346,7 @@
 }
 
 /* ==========================================================================
-   TOOLS: CISCO CLI CHEATSHEET
+   TOOLS: CLI CHEATSHEET
    ========================================================================== */
 .cli-filter-bar {
     margin-bottom: 1.5rem;

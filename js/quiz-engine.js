@@ -45,7 +45,7 @@ const quizBankData = [
     {
         id: "q4",
         moduleId: "m3",
-        question: "¿Cómo calcula OSPF la métrica del costo de una interfaz por defecto en routers Cisco?",
+        question: "¿Cómo calcula OSPF la métrica del costo de una interfaz por defecto en routers de red?",
         options: [
             "Conteo de saltos (Hop Count)",
             "100 Mbps / Ancho de Banda de la Interfaz",
@@ -103,7 +103,7 @@ function initQuizEngine() {
         <div class="quiz-mod-option selected" data-mod="all">
             <i class="fa-solid fa-layer-group"></i>
             <div>
-                <strong>Examen General CCNA 200-301</strong>
+                <strong>Examen General de Redes</strong>
                 <small style="display:block; color:var(--text-muted)">Preguntas combinadas de todos los dominios</small>
             </div>
         </div>

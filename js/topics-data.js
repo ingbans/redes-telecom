@@ -18,7 +18,7 @@ const courseTopicsData = [
             <div class="callout callout-info">
                 <div class="callout-icon"><i class="fa-solid fa-lightbulb"></i></div>
                 <div class="callout-content">
-                    <h4>Punto Clave para el Examen CCNA:</h4>
+                    <h4>Punto Clave de Estudio:</h4>
                     <p>Mientras que OSI es un modelo teórico de 7 capas utilizado principalmente para enseñanza y estandarización, TCP/IP es la suite de protocolos práctica utilizada en el Internet real.</p>
                 </div>
             </div>
@@ -169,7 +169,7 @@ const courseTopicsData = [
             <h2><i class="fa-solid fa-diagram-project"></i> ¿Qué es una VLAN (Virtual LAN)?</h2>
             <p>Una VLAN permite segmentar lógicamente una red física en múltiples dominios de broadcast independientes. Los beneficios incluyen mayor seguridad, reducción de tráfico broadcast y flexibilidad organizativa por departamentos (ej. Ventas, Ingeniería, Servidores).</p>
 
-            <h2><i class="fa-solid fa-code"></i> Configuración de VLANs en Cisco IOS</h2>
+            <h2><i class="fa-solid fa-code"></i> Configuración de VLANs en la CLI</h2>
             <div class="code-block-wrapper">
                 <div class="code-header">
                     <div class="code-header-dots">
@@ -177,7 +177,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Crear VLANs y Asignar Puertos</span>
+                    <span>CLI - Crear VLANs y Asignar Puertos</span>
                 </div>
                 <pre><code><span class="cli-prompt">Switch#</span> <span class="cli-cmd">configure terminal</span>
 <span class="cli-prompt">Switch(config)#</span> <span class="cli-cmd">vlan 10</span>
@@ -200,10 +200,10 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Configurar Enlace Troncal (Trunk)</span>
+                    <span>CLI - Configurar Enlace Troncal (Trunk)</span>
                 </div>
                 <pre><code><span class="cli-prompt">Switch(config)#</span> <span class="cli-cmd">interface gigabitethernet 0/1</span>
-<span class="cli-prompt">Switch(config-if)#</span> <span class="cli-cmd">switchport trunk encapsulation dot1q</span> <span class="cli-comment">! (Requerido en switches 3560/3750)</span>
+<span class="cli-prompt">Switch(config-if)#</span> <span class="cli-cmd">switchport trunk encapsulation dot1q</span>
 <span class="cli-prompt">Switch(config-if)#</span> <span class="cli-cmd">switchport mode trunk</span>
 <span class="cli-prompt">Switch(config-if)#</span> <span class="cli-cmd">switchport trunk allowed vlan 10,20,30</span></code></pre>
             </div>
@@ -224,7 +224,7 @@ const courseTopicsData = [
             <p>STP asigna a un switch central como el <strong>Root Bridge</strong> de la topología. La selección se basa en la <strong>Bridge ID (BID)</strong> más baja:</p>
             <p><code>Bridge ID = Prioridad del Switch (por defecto 32768) + Dirección MAC del Switch</code></p>
 
-            <h2><i class="fa-solid fa-code"></i> Ajuste de Prioridad STP en Cisco IOS</h2>
+            <h2><i class="fa-solid fa-code"></i> Ajuste de Prioridad STP en la CLI</h2>
             <div class="code-block-wrapper">
                 <div class="code-header">
                     <div class="code-header-dots">
@@ -232,7 +232,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Forzar Switch como Root Bridge Primario</span>
+                    <span>CLI - Forzar Switch como Root Bridge Primario</span>
                 </div>
                 <pre><code><span class="cli-prompt">Switch(config)#</span> <span class="cli-cmd">spanning-tree mode rapid-pvst</span>
 <span class="cli-prompt">Switch(config)#</span> <span class="cli-cmd">spanning-tree vlan 10 root primary</span>
@@ -268,7 +268,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Habilitar OSPFv2 en Router</span>
+                    <span>CLI - Habilitar OSPFv2 en Router</span>
                 </div>
                 <pre><code><span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">router ospf 1</span>
 <span class="cli-prompt">Router(config-router)#</span> <span class="cli-cmd">router-id 1.1.1.1</span> <span class="cli-comment">! Asignar Router ID explícito</span>
@@ -311,7 +311,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Configurar Servidor DHCP en Router</span>
+                    <span>CLI - Configurar Servidor DHCP en Router</span>
                 </div>
                 <pre><code><span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">ip dhcp excluded-address 192.168.10.1 192.168.10.10</span>
 <span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">ip dhcp pool LAN_USUARIOS</span>
@@ -330,7 +330,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Configurar PAT (NAT overload)</span>
+                    <span>CLI - Configurar PAT (NAT overload)</span>
                 </div>
                 <pre><code><span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">access-list 1 permit 192.168.10.0 0.0.0.255</span>
 <span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">ip nat inside source list 1 interface gigabitethernet 0/1 overload</span>
@@ -370,7 +370,7 @@ const courseTopicsData = [
                         <span class="dot dot-yellow"></span>
                         <span class="dot dot-green"></span>
                     </div>
-                    <span>Cisco CLI - Configurar ACL Extendida Nombrada</span>
+                    <span>CLI - Configurar ACL Extendida Nombrada</span>
                 </div>
                 <pre><code><span class="cli-prompt">Router(config)#</span> <span class="cli-cmd">ip access-list extended FILTRO_SERVIDORES</span>
 <span class="cli-prompt">Router(config-ext-nacl)#</span> <span class="cli-cmd">deny tcp 192.168.20.0 0.0.0.255 host 10.0.0.50 eq 80</span>
@@ -389,10 +389,10 @@ const courseTopicsData = [
         moduleName: "Módulo 6: Automatización y Redes del Futuro",
         title: "Arquitectura SDN, APIs REST, JSON y Python en Redes",
         duration: "30 min",
-        description: "Transformación digital de la administración de redes: Controladores SDN (Cisco DNA Center), formatos de datos JSON/YAML y APIs REST.",
+        description: "Transformación digital de la administración de redes: Controladores SDN, formatos de datos JSON/YAML y APIs REST.",
         content: `
             <h2><i class="fa-solid fa-robot"></i> De CLI Tradicional a Redes Definidas por Software (SDN)</h2>
-            <p>Las redes tradicionales basan su control en la administración manual dispositivo por dispositivo. SDN separa el <strong>Plano de Control (Control Plane)</strong> del <strong>Plano de Datos (Data Plane)</strong> centralizándolo en un controlador lógico (como Cisco DNA Center / Catalyst Center).</p>
+            <p>Las redes tradicionales basan su control en la administración manual dispositivo por dispositivo. SDN separa el <strong>Plano de Control (Control Plane)</strong> del <strong>Plano de Datos (Data Plane)</strong> centralizándolo en un controlador lógico SDN.</p>
 
             <h2><i class="fa-solid fa-code"></i> Formatos de Datos Estructurados: JSON</h2>
             <p>Las APIs REST de los controladores SDN intercambian información en formato JSON para la automatización mediante scripts de Python o Ansible.</p>
@@ -409,7 +409,7 @@ const courseTopicsData = [
                 <pre><code>{
   "hostname": "Router-Core-01",
   "ip_address": "192.168.1.1",
-  "vendor": "Cisco",
+  "vendor": "Enterprise",
   "interfaces": [
     { "name": "GigabitEthernet0/0", "status": "up", "vlan": 10 },
     { "name": "GigabitEthernet0/1", "status": "up", "vlan": 20 }

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CISCO CLI COMMANDS CHEATSHEET DATABASE
+   CLI COMMANDS CHEATSHEET DATABASE
    ========================================================================== */
 
 const ciscoCommandsDatabase = [

@@ -356,7 +356,7 @@ function performGlobalSearch(query) {
             <div class="calc-card text-center" style="padding: 3rem;">
                 <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
                 <h3>No se encontraron coincidencias</h3>
-                <p style="color: var(--text-secondary)">Prueba buscando términos como "VLAN", "OSPF", "Subnetting", "ACL" o comandos Cisco.</p>
+                <p style="color: var(--text-secondary)">Prueba buscando términos como "VLAN", "OSPF", "Subnetting", "ACL" o comandos de red.</p>
             </div>
         `;
         return;
@@ -385,7 +385,7 @@ function performGlobalSearch(query) {
         card.style.marginBottom = '1rem';
         card.innerHTML = `
             <div>
-                <span class="cmd-mode-badge">Comando Cisco CLI</span>
+                <span class="cmd-mode-badge">Comando CLI</span>
                 <div class="cmd-syntax" style="margin-top:0.4rem;">${c.syntax}</div>
                 <p class="cmd-desc">${c.description}</p>
             </div>
