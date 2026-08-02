@@ -165,62 +165,75 @@ const TEACHER_EMAIL = "bryann25067@gmail.com";
    ========================================================================== */
 function handleGoogleSignIn() {
     if (!auth) {
-        alert("El servicio de Google Firebase no está cargado. Revisa tu conexión a internet.");
+        alert("El servicio de Google Firebase no se ha inicializado correctamente. Verifica tu conexión a internet.");
         return;
     }
 
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
     auth.signInWithPopup(provider)
         .then((result) => {
-            const user = result.user;
-            const email = user.email.toLowerCase().trim();
-
-            // Check if teacher email
-            if (email === TEACHER_EMAIL) {
-                currentSession = { role: 'teacher', user: { name: 'Prof. Bryan Navas (Admin)', email: TEACHER_EMAIL } };
-                localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-                closePortalModals();
-                renderAuthUI();
-                alert("¡Bienvenido Profesor Bryan Navas! Acceso concedido al Panel de Administración.");
-                window.location.hash = '#portal-teacher';
-                return;
-            }
-
-            // Check Whitelist Security for Students
-            if (!isEmailWhitelisted(email)) {
-                alert(`🛑 ACCESO DENEGADO: Tu correo de Google (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
-                auth.signOut();
-                return;
-            }
-
-            let existingStudent = registeredStudents.find(s => s.email === email);
-
-            if (!existingStudent) {
-                existingStudent = {
-                    id: user.uid,
-                    name: user.displayName || 'Estudiante Google',
-                    email: email,
-                    idNumber: 'Google Account',
-                    authProvider: 'google'
-                };
-                registeredStudents.push(existingStudent);
-                if (db) {
-                    db.collection('students').doc(user.uid).set(existingStudent, { merge: true });
-                }
-            }
-
-            currentSession = { role: 'student', user: existingStudent };
-            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-
-            closePortalModals();
-            renderAuthUI();
-            alert(`¡Bienvenido ${existingStudent.name}! Has iniciado sesión con Google.`);
-            window.location.hash = '#portal-student';
+            processAuthenticatedGoogleUser(result.user);
         })
         .catch((error) => {
-            console.error("Error Google Auth:", error);
-            alert(`Error al iniciar sesión con Google: ${error.message}`);
+            console.error("Error Google Auth Popup:", error);
+            
+            if (error.code === 'auth/unauthorized-domain') {
+                alert(`⚠️ ATENCIÓN PROFESOR:\nPara habilitar el inicio de sesión con Google en GitHub Pages, debes ir a tu consola de Firebase:\n\n1. Ve a Authentication > Configuración (Settings)\n2. En "Dominios autorizados", agrega: ingbans.github.io`);
+            } else if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+                // Fallback to redirect
+                auth.signInWithRedirect(provider);
+            } else {
+                alert(`Mensaje de Firebase: ${error.message}`);
+            }
         });
+}
+
+function processAuthenticatedGoogleUser(user) {
+    const email = user.email.toLowerCase().trim();
+
+    // Check if teacher email
+    if (email === TEACHER_EMAIL) {
+        currentSession = { role: 'teacher', user: { name: 'Prof. Bryan Navas (Admin)', email: TEACHER_EMAIL } };
+        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+        closePortalModals();
+        renderAuthUI();
+        alert("¡Bienvenido Profesor Bryan Navas! Acceso concedido al Panel de Administración.");
+        window.location.hash = '#portal-teacher';
+        return;
+    }
+
+    // Check Whitelist Security for Students
+    if (!isEmailWhitelisted(email)) {
+        alert(`🛑 ACCESO DENEGADO: Tu correo de Google (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
+        auth.signOut();
+        return;
+    }
+
+    let existingStudent = registeredStudents.find(s => s.email === email);
+
+    if (!existingStudent) {
+        existingStudent = {
+            id: user.uid,
+            name: user.displayName || 'Estudiante Google',
+            email: email,
+            idNumber: 'Google Account',
+            authProvider: 'google'
+        };
+        registeredStudents.push(existingStudent);
+        if (db) {
+            db.collection('students').doc(user.uid).set(existingStudent, { merge: true });
+        }
+    }
+
+    currentSession = { role: 'student', user: existingStudent };
+    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+
+    closePortalModals();
+    renderAuthUI();
+    alert(`¡Bienvenido ${existingStudent.name}! Has iniciado sesión con Google.`);
+    window.location.hash = '#portal-student';
 }
 
 function renderAuthUI() {
