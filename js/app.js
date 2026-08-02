@@ -192,7 +192,6 @@ function getToolTitle(toolName) {
         case 'subnet': return 'Calculadora Subnetting';
         case 'cli': return 'Cheatsheet Cisco CLI';
         case 'quiz': return 'Simulador de Quizzes';
-        case 'deploy': return 'Publicar en GitHub Pages';
         default: return 'Recurso';
     }
 }

@@ -81,12 +81,6 @@
                             <span>Simulador de Quizzes</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="#tool-deploy" class="nav-item" data-tool="deploy">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Publicar en GitHub</span>
-                        </a>
-                    </li>
                 </ul>
 
                 <div class="nav-section-title">Módulos del Curso</div>
@@ -338,57 +332,7 @@
                     </div>
                 </section>
 
-                <!-- VIEW 5: GitHub Pages Deployment Guide -->
-                <section class="view-section" id="view-tool-deploy">
-                    <div class="tool-header">
-                        <div class="tool-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                        <div>
-                            <h2>Guía de Publicación Gratuita en GitHub Pages</h2>
-                            <p>Instrucciones sencillas para publicar tu curso en internet en 3 minutos.</p>
-                        </div>
-                    </div>
 
-                    <div class="deploy-steps-container">
-                        <div class="step-card">
-                            <div class="step-num">1</div>
-                            <div class="step-content">
-                                <h3>Crear un Repositorio en GitHub</h3>
-                                <p>Ingresa a tu cuenta de <a href="https://github.com/new" target="_blank" rel="noopener">GitHub.com</a> y crea un nuevo repositorio público (ejemplo: <code>curso-redes-ccna</code>).</p>
-                            </div>
-                        </div>
-
-                        <div class="step-card">
-                            <div class="step-num">2</div>
-                            <div class="step-content">
-                                <h3>Subir los Archivos mediante la Terminal (Git)</h3>
-                                <p>Ejecuta los siguientes comandos desde esta carpeta en tu computadora:</p>
-                                <div class="code-block-wrapper">
-                                    <pre><code>git init
-git add .
-git commit -m "Publicación inicial del curso de Redes CCNA"
-git branch -M main
-git remote add origin https://github.com/TU-USUARIO/curso-redes-ccna.git
-git push -u origin main</code></pre>
-                                    <button class="btn-copy-code" onclick="navigator.clipboard.writeText('git init\ngit add .\ngit commit -m \"Publicación inicial del curso de Redes CCNA\"\ngit branch -M main\ngit remote add origin https://github.com/TU-USUARIO/curso-redes-ccna.git\ngit push -u origin main')">
-                                        <i class="fa-regular fa-copy"></i> Copiar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="step-card">
-                            <div class="step-num">3</div>
-                            <div class="step-content">
-                                <h3>Activar GitHub Pages</h3>
-                                <p>En tu repositorio en GitHub, ve a <strong>Settings &gt; Pages</strong>. En la sección <em>Build and deployment</em>, selecciona la rama <code>main</code> y carpeta <code>/ (root)</code>. Haz clic en <strong>Save</strong>.</p>
-                                <div class="info-alert">
-                                    <i class="fa-solid fa-circle-info"></i>
-                                    <span>¡Listo! En unos segundos tu sitio estará disponible públicamente en <code>https://tu-usuario.github.io/curso-redes-ccna/</code></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
                 <!-- Search Results Overlay View -->
                 <section class="view-section" id="view-search-results">
