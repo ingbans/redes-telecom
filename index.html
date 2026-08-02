@@ -349,58 +349,23 @@
 
 
 
-                <!-- VIEW 5: Dedicated Login Page Section -->
                 <section class="view-section" id="view-tool-login">
                     <div class="tool-header">
                         <div class="tool-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary));"><i class="fa-solid fa-right-to-bracket"></i></div>
                         <div>
                             <h2>Acceso al Portal del Curso</h2>
-                            <p>Inicia sesión como Estudiante para ver tus asistencias y notas, o como Profesor para gestionar el curso.</p>
+                            <p>Inicia sesión con tu cuenta de Google para acceder a tu portal de asistencias y notas.</p>
                         </div>
                     </div>
 
-                    <div style="max-width: 520px; margin: 0 auto;">
-                        <div class="calc-card">
-                            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
-                                <button class="btn btn-primary" id="page-tab-login" onclick="switchPageAuthMode('login')" style="flex:1; justify-content:center;">Iniciar Sesión</button>
-                                <button class="btn btn-outline" id="page-tab-register" onclick="switchPageAuthMode('register')" style="flex:1; justify-content:center;">Registrar Alumno</button>
-                            </div>
-
-                            <!-- Page Login Form -->
-                            <form id="page-login-form">
-                                <div class="form-group">
-                                    <label>Correo Electrónico:</label>
-                                    <input type="email" id="page-login-email" placeholder="ejemplo@universidad.edu o bryann25067@gmail.com">
-                                </div>
-                                <div class="form-group">
-                                    <label>Contraseña:</label>
-                                    <input type="password" id="page-login-password" placeholder="••••••••">
-                                </div>
-
-                                <button type="submit" class="btn btn-primary btn-block btn-lg mt-3"><i class="fa-solid fa-right-to-bracket"></i> Ingresar al Portal</button>
-                                <button type="button" class="btn btn-outline btn-block btn-lg mt-2" onclick="handleGoogleSignIn(event)"><i class="fa-brands fa-google" style="color:#ea4335; margin-right:0.5rem;"></i> Iniciar sesión con Google</button>
-                            </form>
-
-                            <!-- Page Register Form -->
-                            <form id="page-register-form" class="hidden">
-                                <div class="form-group">
-                                    <label>Nombre Completo:</label>
-                                    <input type="text" id="page-reg-name" required placeholder="Ej. Carlos Mendoza">
-                                </div>
-                                <div class="form-group">
-                                    <label>Cédula de Identidad / Carnet:</label>
-                                    <input type="text" id="page-reg-id" required placeholder="Ej. 28.123.456">
-                                </div>
-                                <div class="form-group">
-                                    <label>Correo Electrónico:</label>
-                                    <input type="email" id="page-reg-email" required placeholder="ejemplo@universidad.edu">
-                                </div>
-                                <div class="form-group">
-                                    <label>Crear Contraseña:</label>
-                                    <input type="password" id="page-reg-password" required placeholder="••••••••">
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-block btn-lg mt-3"><i class="fa-solid fa-user-plus"></i> Crear Cuenta de Estudiante</button>
-                            </form>
+                    <div style="max-width: 480px; margin: 0 auto;">
+                        <div class="calc-card" style="text-align:center;">
+                            <i class="fa-brands fa-google" style="font-size:3rem; color:#ea4335; margin-bottom:1rem; display:block;"></i>
+                            <h3 style="margin-bottom:0.5rem;">Inicia sesión con Google</h3>
+                            <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:0.9rem;">Utiliza tu cuenta de Google institucional o personal para acceder al portal. Solo correos autorizados por el profesor podrán ingresar.</p>
+                            <button type="button" class="btn btn-outline btn-block btn-lg" onclick="handleGoogleSignIn(event)" style="justify-content:center; gap:0.75rem;">
+                                <i class="fa-brands fa-google" style="color:#ea4335;"></i> Continuar con Google
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -632,7 +597,7 @@
         </div>
     </div>
 
-    <!-- Portal Auth Modals -->
+    <!-- Portal Auth Modal -->
     <div class="portal-modal-overlay hidden" id="portal-modal-overlay">
         <!-- LOGIN BOX -->
         <div class="portal-modal-box hidden" id="modal-box-login">
@@ -640,52 +605,13 @@
                 <h3><i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión</h3>
                 <button class="modal-close-btn" onclick="closePortalModals()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="portal-login-form">
-                <div class="form-group">
-                    <label>Correo Electrónico:</label>
-                    <input type="email" id="login-email" placeholder="ejemplo@universidad.edu o bryann25067@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña:</label>
-                    <input type="password" id="login-password" placeholder="••••••••">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block mt-3">Ingresar al Portal</button>
-                <button type="button" class="btn btn-outline btn-block mt-2" onclick="handleGoogleSignIn(event)"><i class="fa-brands fa-google" style="color:#ea4335; margin-right:0.5rem;"></i> Continuar con Google</button>
-                <div class="text-center mt-3" style="font-size:0.85rem;">
-                    ¿Eres alumno y no tienes cuenta? <a href="#" onclick="openRegisterModal(); return false;" style="color:var(--primary);">Regístrate aquí</a>
-                </div>
-            </form>
-        </div>
-
-        <!-- REGISTER BOX -->
-        <div class="portal-modal-box hidden" id="modal-box-register">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-plus"></i> Registro de Estudiante</h3>
-                <button class="modal-close-btn" onclick="closePortalModals()"><i class="fa-solid fa-xmark"></i></button>
+            <div style="text-align:center; padding: 1rem 0;">
+                <i class="fa-brands fa-google" style="font-size:2.5rem; color:#ea4335; margin-bottom:1rem; display:block;"></i>
+                <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:0.9rem;">Solo correos autorizados por el profesor podrán ingresar.</p>
+                <button type="button" class="btn btn-outline btn-block" onclick="handleGoogleSignIn(event)" style="justify-content:center; gap:0.75rem;">
+                    <i class="fa-brands fa-google" style="color:#ea4335;"></i> Continuar con Google
+                </button>
             </div>
-            <form id="student-register-form">
-                <div class="form-group">
-                    <label>Nombre Completo:</label>
-                    <input type="text" id="reg-name" required placeholder="Ej. Carlos Mendoza">
-                </div>
-                <div class="form-group">
-                    <label>Cédula de Identidad / Carnet:</label>
-                    <input type="text" id="reg-id" required placeholder="Ej. 28.123.456">
-                </div>
-                <div class="form-group">
-                    <label>Correo Electrónico:</label>
-                    <input type="email" id="reg-email" required placeholder="ejemplo@universidad.edu">
-                </div>
-                <div class="form-group">
-                    <label>Crear Contraseña:</label>
-                    <input type="password" id="reg-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block mt-3">Crear Cuenta de Estudiante</button>
-                <div class="text-center mt-3" style="font-size:0.85rem;">
-                    ¿Ya tienes cuenta? <a href="#" onclick="openLoginModal(); return false;" style="color:var(--primary);">Iniciar Sesión</a>
-                </div>
-            </form>
         </div>
     </div>
 

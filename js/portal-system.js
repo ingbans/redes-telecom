@@ -306,48 +306,6 @@ function handleLogout() {
    MODAL & FORM HANDLERS
    ========================================================================== */
 function initPortalModals() {
-    const registerForm = document.getElementById('student-register-form');
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim().toLowerCase();
-            const idNumber = document.getElementById('reg-id').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            performStudentRegistration(name, email, idNumber, password);
-        });
-    }
-
-    const loginForm = document.getElementById('portal-login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            performUserLogin('modal');
-        });
-    }
-
-    const pageLoginForm = document.getElementById('page-login-form');
-    if (pageLoginForm) {
-        pageLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            performUserLogin('page');
-        });
-    }
-
-    const pageRegisterForm = document.getElementById('page-register-form');
-    if (pageRegisterForm) {
-        pageRegisterForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('page-reg-name').value.trim();
-            const email = document.getElementById('page-reg-email').value.trim().toLowerCase();
-            const idNumber = document.getElementById('page-reg-id').value.trim();
-            const password = document.getElementById('page-reg-password').value;
-
-            performStudentRegistration(name, email, idNumber, password);
-        });
-    }
-
     const addWhitelistForm = document.getElementById('add-whitelist-form');
     if (addWhitelistForm) {
         addWhitelistForm.addEventListener('submit', (e) => {
@@ -359,110 +317,9 @@ function initPortalModals() {
     }
 }
 
-function performStudentRegistration(name, email, idNumber, password) {
-    if (!isEmailWhitelisted(email)) {
-        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
-        return;
-    }
-
-    if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
-        alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
-        return;
-    }
-
-    const stdId = 'std_' + Date.now();
-    const newStudent = {
-        id: stdId,
-        name,
-        email,
-        idNumber,
-        password,
-        authProvider: 'email'
-    };
-
-    registeredStudents.push(newStudent);
-    localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
-
-    if (db) {
-        db.collection('students').doc(stdId).set(newStudent).catch(console.error);
-    }
-
-    currentSession = { role: 'student', user: newStudent };
-    localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-
-    closePortalModals();
-    renderAuthUI();
-    alert(`¡Registro exitoso en la nube! Bienvenido ${name}.`);
-    window.location.hash = '#portal-student';
-}
-
-function performUserLogin(sourcePrefix) {
-    const emailInput = document.getElementById(sourcePrefix === 'modal' ? 'login-email' : 'page-login-email');
-    const passInput = document.getElementById(sourcePrefix === 'modal' ? 'login-password' : 'page-login-password');
-
-    if (!emailInput || !passInput) return;
-
-    const email = emailInput.value.trim().toLowerCase();
-    const password = passInput.value;
-
-    // Check if Teacher Email
-    if (email === TEACHER_EMAIL) {
-        currentSession = { role: 'teacher', user: { name: 'Prof. Bryan Navas (Admin)', email: TEACHER_EMAIL } };
-        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-        closePortalModals();
-        renderAuthUI();
-        alert("¡Bienvenido Profesor Bryan Navas! Acceso concedido al Panel de Administración.");
-        window.location.hash = '#portal-teacher';
-        return;
-    }
-
-    // Student Login & Whitelist Check
-    if (!isEmailWhitelisted(email)) {
-        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
-        return;
-    }
-
-    const student = registeredStudents.find(s => s.email === email && s.password === password);
-    if (student) {
-        currentSession = { role: 'student', user: student };
-        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-        closePortalModals();
-        renderAuthUI();
-        window.location.hash = '#portal-student';
-    } else {
-        alert('Correo o contraseña de estudiante incorrecta.');
-    }
-}
-
-function switchPageAuthMode(mode) {
-    const loginForm = document.getElementById('page-login-form');
-    const regForm = document.getElementById('page-register-form');
-    const tabLogin = document.getElementById('page-tab-login');
-    const tabReg = document.getElementById('page-tab-register');
-
-    if (mode === 'login') {
-        loginForm.classList.remove('hidden');
-        regForm.classList.add('hidden');
-        tabLogin.className = 'btn btn-primary';
-        tabReg.className = 'btn btn-outline';
-    } else {
-        loginForm.classList.add('hidden');
-        regForm.classList.remove('hidden');
-        tabLogin.className = 'btn btn-outline';
-        tabReg.className = 'btn btn-primary';
-    }
-}
-
 function openLoginModal() {
     document.getElementById('portal-modal-overlay').classList.remove('hidden');
     document.getElementById('modal-box-login').classList.remove('hidden');
-    document.getElementById('modal-box-register').classList.add('hidden');
-}
-
-function openRegisterModal() {
-    document.getElementById('portal-modal-overlay').classList.remove('hidden');
-    document.getElementById('modal-box-login').classList.add('hidden');
-    document.getElementById('modal-box-register').classList.remove('hidden');
 }
 
 function closePortalModals() {
