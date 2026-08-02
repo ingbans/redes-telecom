@@ -574,9 +574,14 @@
                         <div class="calc-card" style="margin-bottom: 1.5rem;">
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                                 <h3><i class="fa-solid fa-users"></i> Alumnos Registrados</h3>
-                                <button class="btn btn-primary btn-sm" onclick="exportPortalDataJSON()">
-                                    <i class="fa-solid fa-download"></i> Descargar Respaldo JSON
-                                </button>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <button class="btn btn-secondary btn-sm" onclick="purgeNonWhitelistedStudents()">
+                                        <i class="fa-solid fa-user-slash"></i> Limpiar No Autorizados
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" onclick="exportPortalDataJSON()">
+                                        <i class="fa-solid fa-download"></i> Respaldo JSON
+                                    </button>
+                                </div>
                             </div>
                             <div class="custom-table-container" style="margin-top:1rem;">
                                 <table class="custom-table">

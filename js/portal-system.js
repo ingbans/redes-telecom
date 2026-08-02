@@ -128,7 +128,7 @@ function setupFirestoreRealtimeSync() {
 function isEmailWhitelisted(email) {
     if (!email) return false;
     const cleanEmail = email.toLowerCase().trim();
-    if (whitelistEmails.length === 0) return true; // Whitelist inactive until professor adds first email
+    if (cleanEmail === TEACHER_EMAIL) return true;
     return whitelistEmails.includes(cleanEmail);
 }
 
@@ -851,6 +851,27 @@ function deleteStudent(studentId) {
             db.collection('students').doc(studentId).delete().catch(console.error);
         }
         renderTeacherPanel();
+    }
+}
+
+function purgeNonWhitelistedStudents() {
+    const invalidStudents = registeredStudents.filter(s => !isEmailWhitelisted(s.email));
+
+    if (invalidStudents.length === 0) {
+        alert("Todos los alumnos actualmente registrados están autorizados en tu Lista Blanca.");
+        return;
+    }
+
+    if (confirm(`Se han detectado ${invalidStudents.length} registro(s) de prueba no autorizados en la Lista Blanca. ¿Deseas eliminarlos de la nómina ahora?`)) {
+        invalidStudents.forEach(std => {
+            registeredStudents = registeredStudents.filter(s => s.id !== std.id);
+            if (db) {
+                db.collection('students').doc(std.id).delete().catch(console.error);
+            }
+        });
+        localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+        renderTeacherPanel();
+        alert("¡Cuentas no autorizadas eliminadas con éxito!");
     }
 }
 
