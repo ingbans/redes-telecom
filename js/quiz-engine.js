@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CCNA QUIZ SIMULATOR ENGINE
+   QUIZ SIMULATOR ENGINE (SELF-ASSESSMENT ONLY)
    ========================================================================== */
 
 const quizBankData = [
@@ -100,38 +100,21 @@ function initQuizEngine() {
 
     // Render module options
     moduleSelector.innerHTML = `
+        <div class="info-alert" style="margin-bottom: 1.5rem; background-color: rgba(14, 165, 233, 0.1); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 8px;">
+            <i class="fa-solid fa-circle-info" style="font-size: 1.2rem; color: var(--primary);"></i>
+            <span><strong>Nota Importante:</strong> Este quiz es una herramienta de autoevaluación formativa para medir tus capacidades y <strong>NO tiene ninguna influencia sobre la nota oficial del examen</strong>. Puedes realizarlo cuantas veces quieras.</span>
+        </div>
         <div class="quiz-mod-option selected" data-mod="all">
             <i class="fa-solid fa-layer-group"></i>
             <div>
                 <strong>Examen General de Redes</strong>
-                <small style="display:block; color:var(--text-muted)">Preguntas combinadas de todos los dominios</small>
+                <small style="display:block; color:var(--text-muted)">Preguntas combinadas de todos los temas</small>
             </div>
-        </div>
-        <div class="quiz-mod-option" data-mod="m1">
-            <i class="fa-solid fa-network-wired"></i>
-            <div><strong>Módulo 1: Fundamentos de Redes</strong></div>
-        </div>
-        <div class="quiz-mod-option" data-mod="m2">
-            <i class="fa-solid fa-diagram-project"></i>
-            <div><strong>Módulo 2: Acceso a la Red (VLANs & STP)</strong></div>
-        </div>
-        <div class="quiz-mod-option" data-mod="m3">
-            <i class="fa-solid fa-route"></i>
-            <div><strong>Módulo 3: Conectividad IP & OSPF</strong></div>
         </div>
     `;
 
-    // Module Selection event
-    moduleSelector.querySelectorAll('.quiz-mod-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            moduleSelector.querySelectorAll('.quiz-mod-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-        });
-    });
-
     startBtn.addEventListener('click', () => {
-        const selectedMod = moduleSelector.querySelector('.quiz-mod-option.selected').getAttribute('data-mod');
-        startQuizSession(selectedMod);
+        startQuizSession('all');
     });
 
     document.getElementById('next-question-btn').addEventListener('click', nextQuizQuestion);
@@ -139,13 +122,7 @@ function initQuizEngine() {
 }
 
 function startQuizSession(modId) {
-    let questions = [];
-    if (modId === 'all') {
-        questions = [...quizBankData];
-    } else {
-        questions = quizBankData.filter(q => q.moduleId === modId);
-        if (questions.length === 0) questions = [...quizBankData];
-    }
+    let questions = [...quizBankData];
 
     currentQuizState = {
         activeQuestions: questions,
@@ -241,17 +218,22 @@ function finishQuizSession() {
     const percent = Math.round((currentQuizState.score / total) * 100);
 
     document.getElementById('result-score-percent').textContent = `${percent}%`;
-    document.getElementById('result-score-text').textContent = `Respondiste correctamente ${currentQuizState.score} de ${total} preguntas.`;
+    document.getElementById('result-score-text').textContent = `Respondiste correctamente ${currentQuizState.score} de ${total} preguntas. (Autoevaluación formativa sin peso en exámenes).`;
 
     const iconCircle = document.getElementById('result-icon-circle');
     const title = document.getElementById('result-title');
 
     if (percent >= 70) {
-        title.textContent = "¡Felicitaciones! Dominas este tema";
+        title.textContent = "¡Excelente Trabajo en tu Práctica!";
         iconCircle.style.background = "linear-gradient(135deg, #10b981, #059669)";
     } else {
-        title.textContent = "Sigue Repasando los Módulos";
+        title.textContent = "Sigue Practicando con los Quizzes";
         iconCircle.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+    }
+
+    // Record quiz attempt for student if logged in
+    if (typeof recordStudentQuizAttempt === 'function' && currentSession && currentSession.role === 'student') {
+        recordStudentQuizAttempt(percent);
     }
 }
 

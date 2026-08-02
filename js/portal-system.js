@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PORTAL SYSTEM: AUTHENTICATION, ATTENDANCE & GRADEBOOK ENGINE
+   PORTAL SYSTEM: AUTHENTICATION, ATTENDANCE, GRADEBOOK & QUIZ LOGS
    ========================================================================== */
 
 // Default Data & Initial State
@@ -8,6 +8,7 @@ const PORTAL_KEYS = {
     CALENDAR: 'net_portal_calendar',
     ATTENDANCE: 'net_portal_attendance',
     GRADES: 'net_portal_grades',
+    QUIZZES: 'net_portal_quizzes',
     SESSION: 'net_portal_session',
     TEACHER_PIN: 'net_portal_teacher_pin'
 };
@@ -20,6 +21,7 @@ let registeredStudents = JSON.parse(localStorage.getItem(PORTAL_KEYS.STUDENTS) |
 let classCalendar = JSON.parse(localStorage.getItem(PORTAL_KEYS.CALENDAR) || '{}'); // { "clase-1": "2026-09-15", ... }
 let attendanceRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.ATTENDANCE) || '{}'); // { "studentId_claseId": "presente"|"ausente"|"justificado" }
 let gradesRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.GRADES) || '{}'); // { "studentId": { ex1: 18, ex2: 16, ex3: 19 } }
+let quizAttemptsRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.QUIZZES) || '{}'); // { "studentId": [ { score: 80, date: 'ISO' }, ... ] }
 
 function initPortalSystem() {
     ensureDefaultCalendar();
@@ -98,7 +100,6 @@ function handleLogout() {
    MODAL HANDLERS
    ========================================================================== */
 function initPortalModals() {
-    // Student Register Form
     const registerForm = document.getElementById('student-register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -135,7 +136,6 @@ function initPortalModals() {
         });
     }
 
-    // Login Form (Student or Teacher)
     const loginForm = document.getElementById('portal-login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -191,6 +191,22 @@ function closePortalModals() {
 }
 
 /* ==========================================================================
+   QUIZ ATTEMPTS RECORDING (SELF-ASSESSMENT)
+   ========================================================================== */
+function recordStudentQuizAttempt(percentScore) {
+    if (!currentSession || currentSession.role !== 'student') return;
+    const stdId = currentSession.user.id;
+    if (!quizAttemptsRecords[stdId]) quizAttemptsRecords[stdId] = [];
+
+    quizAttemptsRecords[stdId].push({
+        score: percentScore,
+        date: new Date().toISOString()
+    });
+
+    localStorage.setItem(PORTAL_KEYS.QUIZZES, JSON.stringify(quizAttemptsRecords));
+}
+
+/* ==========================================================================
    STUDENT PORTAL RENDERING
    ========================================================================== */
 function renderStudentPortal() {
@@ -200,7 +216,6 @@ function renderStudentPortal() {
     }
 
     const student = currentSession.user;
-    const isTeacherPreview = currentSession.role === 'teacher';
 
     document.getElementById('std-profile-name').textContent = student.name || 'Vista previa del Profesor';
     document.getElementById('std-profile-id').textContent = `Cédula/Carnet: ${student.idNumber || 'ADMIN'}`;
@@ -243,29 +258,29 @@ function renderStudentPortal() {
     const attendPercent = Math.round((presentCount / totalClasses) * 100);
     document.getElementById('std-attendance-percent').textContent = `${attendPercent}% (${presentCount}/12 Clases)`;
 
-    // Grades summary
+    // Official Exam Grades summary (Strictly 0 to 20 points scale)
     const stdGrades = gradesRecords[student.id] || { ex1: null, ex2: null, ex3: null };
     
-    document.getElementById('std-grade-ex1').textContent = stdGrades.ex1 !== null ? `${stdGrades.ex1} / 20` : 'Pendiente';
-    document.getElementById('std-grade-ex2').textContent = stdGrades.ex2 !== null ? `${stdGrades.ex2} / 20` : 'Pendiente';
-    document.getElementById('std-grade-ex3').textContent = stdGrades.ex3 !== null ? `${stdGrades.ex3} / 20` : 'Pendiente';
+    document.getElementById('std-grade-ex1').textContent = stdGrades.ex1 !== null ? `${stdGrades.ex1} / 20 pts` : 'Pendiente';
+    document.getElementById('std-grade-ex2').textContent = stdGrades.ex2 !== null ? `${stdGrades.ex2} / 20 pts` : 'Pendiente';
+    document.getElementById('std-grade-ex3').textContent = stdGrades.ex3 !== null ? `${stdGrades.ex3} / 20 pts` : 'Pendiente';
 
     // Calculate final average
-    const validGrades = [stdGrades.ex1, stdGrades.ex2, stdGrades.ex3].filter(g => g !== null && g !== undefined);
+    const validGrades = [stdGrades.ex1, stdGrades.ex2, stdGrades.ex3].filter(g => g !== null && g !== undefined && g !== '');
     let avg = 0;
     if (validGrades.length > 0) {
         avg = (validGrades.reduce((a, b) => Number(a) + Number(b), 0) / validGrades.length).toFixed(1);
     }
 
     const avgEl = document.getElementById('std-grade-avg');
-    avgEl.textContent = validGrades.length > 0 ? `${avg} / 20` : '-';
+    avgEl.textContent = validGrades.length > 0 ? `${avg} / 20 pts` : '-';
     
     const statusText = document.getElementById('std-grade-status');
     if (validGrades.length === 0) {
         statusText.textContent = 'En curso';
         statusText.style.color = 'var(--text-muted)';
     } else if (avg >= 10) {
-        statusText.textContent = 'Aprobando';
+        statusText.textContent = 'Aprobando (Min. 10 pts)';
         statusText.style.color = 'var(--accent)';
     } else {
         statusText.textContent = 'Reprobando';
@@ -277,7 +292,6 @@ function renderStudentPortal() {
    TEACHER PANEL RENDERING & CONTROL
    ========================================================================== */
 function initTeacherPanelEvents() {
-    // Tab Switching
     document.querySelectorAll('.teacher-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.teacher-tab-btn').forEach(b => b.classList.remove('active'));
@@ -324,7 +338,6 @@ function renderCalendarConfigTab() {
         container.appendChild(card);
     });
 
-    // Event listener to save dates
     container.querySelectorAll('.cal-date-input').forEach(input => {
         input.addEventListener('change', (e) => {
             const topicId = e.target.getAttribute('data-topic-id');
@@ -339,7 +352,6 @@ function renderAttendanceTab() {
     const tbody = document.getElementById('teacher-att-tbody');
     if (!selectClass || !tbody) return;
 
-    // Populate dropdown if empty
     if (selectClass.children.length === 0) {
         courseTopicsData.forEach(topic => {
             const dateStr = classCalendar[topic.id] || '';
@@ -414,9 +426,9 @@ function renderGradesTab() {
         tr.innerHTML = `
             <td><strong>${std.name}</strong></td>
             <td><code>${std.idNumber}</code></td>
-            <td><input type="number" min="0" max="20" class="grade-input" data-student-id="${std.id}" data-exam="ex1" value="${stdGrades.ex1}"></td>
-            <td><input type="number" min="0" max="20" class="grade-input" data-student-id="${std.id}" data-exam="ex2" value="${stdGrades.ex2}"></td>
-            <td><input type="number" min="0" max="20" class="grade-input" data-student-id="${std.id}" data-exam="ex3" value="${stdGrades.ex3}"></td>
+            <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex1" value="${stdGrades.ex1}"></td>
+            <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex2" value="${stdGrades.ex2}"></td>
+            <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex3" value="${stdGrades.ex3}"></td>
             <td><strong class="calculated-avg" id="avg_${std.id}">-</strong></td>
         `;
         tbody.appendChild(tr);
@@ -427,7 +439,13 @@ function renderGradesTab() {
         inp.addEventListener('input', (e) => {
             const stdId = e.target.getAttribute('data-student-id');
             const examKey = e.target.getAttribute('data-exam');
-            const val = e.target.value !== '' ? Number(e.target.value) : '';
+            let val = e.target.value !== '' ? Number(e.target.value) : '';
+
+            if (val !== '' && (val < 0 || val > 20)) {
+                alert('La calificación debe estar comprendida estrictamente entre 0 y 20 puntos.');
+                e.target.value = val > 20 ? 20 : 0;
+                val = e.target.value;
+            }
 
             if (!gradesRecords[stdId]) gradesRecords[stdId] = { ex1: '', ex2: '', ex3: '' };
             gradesRecords[stdId][examKey] = val;
@@ -446,7 +464,7 @@ function updateLiveStudentAvg(studentId) {
 
     if (vals.length > 0) {
         const avg = (vals.reduce((a, b) => Number(a) + Number(b), 0) / vals.length).toFixed(1);
-        avgEl.textContent = `${avg} / 20`;
+        avgEl.textContent = `${avg} / 20 pts`;
         avgEl.style.color = avg >= 10 ? 'var(--accent)' : 'var(--danger)';
     } else {
         avgEl.textContent = '-';
@@ -460,11 +478,15 @@ function renderRosterTab() {
 
     tbody.innerHTML = '';
     registeredStudents.forEach(std => {
+        const stdQuizLogs = quizAttemptsRecords[std.id] || [];
+        const quizCount = stdQuizLogs.length;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${std.name}</strong></td>
             <td>${std.email}</td>
             <td><code>${std.idNumber}</code></td>
+            <td><span class="status-pill status-present"><i class="fa-solid fa-vial"></i> ${quizCount} Prácticas</span></td>
             <td>
                 <button class="btn btn-secondary btn-sm" onclick="deleteStudent('${std.id}')">
                     <i class="fa-solid fa-trash"></i> Eliminar
@@ -489,6 +511,7 @@ function exportPortalDataJSON() {
         students: registeredStudents,
         attendance: attendanceRecords,
         grades: gradesRecords,
+        quizzes: quizAttemptsRecords,
         exportedAt: new Date().toISOString()
     };
 
