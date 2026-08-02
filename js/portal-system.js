@@ -91,7 +91,10 @@ function setupFirestoreRealtimeSync() {
             registeredStudents.push({ id: doc.id, ...doc.data() });
         });
         localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
-        if (window.location.hash === '#portal-teacher') renderRosterTab();
+        if (window.location.hash === '#portal-teacher') {
+            renderRosterTab();
+            renderArchivedTab();
+        }
     });
 
     // Realtime Attendance Sync
@@ -565,6 +568,7 @@ function renderTeacherPanel() {
     renderAttendanceTab();
     renderGradesTab();
     renderRosterTab();
+    renderArchivedTab();
     renderWhitelistTab();
 }
 
@@ -623,12 +627,14 @@ function renderAttendanceForSelectedClass() {
     const tbody = document.getElementById('teacher-att-tbody');
     tbody.innerHTML = '';
 
-    if (registeredStudents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
+    const activeStudents = registeredStudents.filter(s => !s.archived);
+
+    if (activeStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes activos en la nómina.</td></tr>`;
         return;
     }
 
-    registeredStudents.forEach(std => {
+    activeStudents.forEach(std => {
         const key = `${std.id}_${topicId}`;
         const currentStatus = attendanceRecords[key] || 'pendiente';
 
@@ -670,12 +676,14 @@ function renderGradesTab() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    if (registeredStudents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
+    const activeStudents = registeredStudents.filter(s => !s.archived);
+
+    if (activeStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes activos en la nómina.</td></tr>`;
         return;
     }
 
-    registeredStudents.forEach(std => {
+    activeStudents.forEach(std => {
         const rawGrades = gradesRecords[std.id] || {};
         const stdGrades = {
             ex1: rawGrades.ex1 !== undefined ? rawGrades.ex1 : '',
@@ -771,18 +779,24 @@ function renderRosterTab() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    if (registeredStudents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
+    const activeStudents = registeredStudents.filter(s => !s.archived);
+
+    if (activeStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes activos en la nómina.</td></tr>`;
         return;
     }
-    registeredStudents.forEach(std => {
+
+    activeStudents.forEach(std => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${std.name}</strong></td>
             <td>${std.email}</td>
             <td><code>${std.idNumber}</code></td>
-            <td>
-                <button class="btn btn-secondary btn-sm" onclick="deleteStudent('${std.id}')">
+            <td style="display:flex; gap:0.5rem;">
+                <button class="btn btn-outline btn-sm" onclick="archiveStudent('${std.id}')" title="Archivar estudiante">
+                    <i class="fa-solid fa-box-archive"></i> Archivar
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="deleteStudent('${std.id}')" title="Eliminar de todas las bases de datos">
                     <i class="fa-solid fa-trash"></i> Eliminar
                 </button>
             </td>
@@ -791,15 +805,110 @@ function renderRosterTab() {
     });
 }
 
-function deleteStudent(studentId) {
-    if (confirm('¿Estás seguro de eliminar a este estudiante de la nómina?')) {
-        registeredStudents = registeredStudents.filter(s => s.id !== studentId);
-        localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+function renderArchivedTab() {
+    const tbody = document.getElementById('teacher-archived-tbody');
+    if (!tbody) return;
 
-        if (db) {
-            db.collection('students').doc(studentId).delete().catch(console.error);
-        }
+    tbody.innerHTML = '';
+    const archivedStudents = registeredStudents.filter(s => s.archived === true);
+
+    if (archivedStudents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes archivados.</td></tr>`;
+        return;
+    }
+
+    archivedStudents.forEach(std => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${std.name}</strong></td>
+            <td>${std.email}</td>
+            <td><code>${std.idNumber}</code></td>
+            <td style="display:flex; gap:0.5rem;">
+                <button class="btn btn-outline btn-sm" onclick="unarchiveStudent('${std.id}')" title="Restaurar a la nómina activa">
+                    <i class="fa-solid fa-box-open"></i> Desarchivar
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="deleteStudent('${std.id}')" title="Eliminar de todas las bases de datos">
+                    <i class="fa-solid fa-trash"></i> Eliminar Definitivamente
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function archiveStudent(studentId) {
+    const std = registeredStudents.find(s => s.id === studentId);
+    if (!std) return;
+
+    std.archived = true;
+    localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+    if (db) {
+        db.collection('students').doc(studentId).set({ archived: true }, { merge: true }).catch(console.error);
+    }
+
+    renderTeacherPanel();
+}
+
+function unarchiveStudent(studentId) {
+    const std = registeredStudents.find(s => s.id === studentId);
+    if (!std) return;
+
+    std.archived = false;
+    localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+
+    if (db) {
+        db.collection('students').doc(studentId).set({ archived: false }, { merge: true }).catch(console.error);
+    }
+
+    renderTeacherPanel();
+}
+
+function deleteStudent(studentId) {
+    const std = registeredStudents.find(s => s.id === studentId);
+    const studentName = std ? std.name : 'este estudiante';
+
+    if (confirm(`⚠️ ¿Estás seguro de eliminar permanentemente a ${studentName}?\n\nEsta acción borrará al estudiante y TODOS sus registros (calificaciones, asistencias y evaluaciones) de la base de datos de forma irreversible.`)) {
+        deleteStudentDatabaseRecords(studentId);
         renderTeacherPanel();
+    }
+}
+
+function deleteStudentDatabaseRecords(studentId) {
+    // 1. Delete student doc from registeredStudents list & Firestore
+    registeredStudents = registeredStudents.filter(s => s.id !== studentId);
+    localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
+    if (db) {
+        db.collection('students').doc(studentId).delete().catch(console.error);
+    }
+
+    // 2. Delete grades record
+    if (gradesRecords[studentId]) {
+        delete gradesRecords[studentId];
+        localStorage.setItem(PORTAL_KEYS.GRADES, JSON.stringify(gradesRecords));
+        if (db) {
+            db.collection('grades').doc(studentId).delete().catch(console.error);
+        }
+    }
+
+    // 3. Delete attendance records
+    Object.keys(attendanceRecords).forEach(key => {
+        if (key.startsWith(`${studentId}_`)) {
+            delete attendanceRecords[key];
+            if (db) {
+                db.collection('attendance').doc(key).delete().catch(console.error);
+            }
+        }
+    });
+    localStorage.setItem(PORTAL_KEYS.ATTENDANCE, JSON.stringify(attendanceRecords));
+
+    // 4. Delete quiz attempt records
+    if (quizAttemptsRecords[studentId]) {
+        delete quizAttemptsRecords[studentId];
+        localStorage.setItem(PORTAL_KEYS.QUIZZES, JSON.stringify(quizAttemptsRecords));
+        if (db) {
+            db.collection('quizzes').doc(studentId).delete().catch(console.error);
+        }
     }
 }
 
@@ -811,16 +920,12 @@ function purgeNonWhitelistedStudents() {
         return;
     }
 
-    if (confirm(`Se han detectado ${invalidStudents.length} registro(s) de prueba no autorizados en la Lista Blanca. ¿Deseas eliminarlos de la nómina ahora?`)) {
+    if (confirm(`Se han detectado ${invalidStudents.length} registro(s) de prueba no autorizados en la Lista Blanca. ¿Deseas eliminarlos de las bases de datos de forma permanente?`)) {
         invalidStudents.forEach(std => {
-            registeredStudents = registeredStudents.filter(s => s.id !== std.id);
-            if (db) {
-                db.collection('students').doc(std.id).delete().catch(console.error);
-            }
+            deleteStudentDatabaseRecords(std.id);
         });
-        localStorage.setItem(PORTAL_KEYS.STUDENTS, JSON.stringify(registeredStudents));
         renderTeacherPanel();
-        alert("¡Cuentas no autorizadas eliminadas con éxito!");
+        alert("¡Cuentas no autorizadas y sus registros eliminados con éxito!");
     }
 }
 

@@ -463,8 +463,9 @@
                         <button class="teacher-tab-btn active" data-tab="tab-teacher-calendar"><i class="fa-solid fa-calendar-days"></i> 1. Calendario de Clases</button>
                         <button class="teacher-tab-btn" data-tab="tab-teacher-attendance"><i class="fa-solid fa-clipboard-user"></i> 2. Tomar Asistencias</button>
                         <button class="teacher-tab-btn" data-tab="tab-teacher-grades"><i class="fa-solid fa-pen-to-square"></i> 3. Cargar Calificaciones</button>
-                        <button class="teacher-tab-btn" data-tab="tab-teacher-roster"><i class="fa-solid fa-users-gear"></i> 4. Nómina de Alumnos & Respaldos</button>
-                        <button class="teacher-tab-btn" data-tab="tab-teacher-whitelist"><i class="fa-solid fa-user-shield"></i> 5. Lista Blanca de Correos</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-roster"><i class="fa-solid fa-users-gear"></i> 4. Nómina de Alumnos &amp; Respaldos</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-archived"><i class="fa-solid fa-box-archive"></i> 5. Alumnos Archivados</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-whitelist"><i class="fa-solid fa-user-shield"></i> 6. Lista Blanca de Correos</button>
                     </div>
 
                     <!-- TAB 1: Calendar Config -->
@@ -541,7 +542,7 @@
                     <div class="teacher-tab-content" id="tab-teacher-roster">
                         <div class="calc-card" style="margin-bottom: 1.5rem;">
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                                <h3><i class="fa-solid fa-users"></i> Alumnos Registrados</h3>
+                                <h3><i class="fa-solid fa-users"></i> Alumnos Registrados (Activos)</h3>
                                 <div style="display:flex; gap:0.5rem;">
                                     <button class="btn btn-secondary btn-sm" onclick="purgeNonWhitelistedStudents()">
                                         <i class="fa-solid fa-user-slash"></i> Limpiar No Autorizados
@@ -569,7 +570,32 @@
                         </div>
                     </div>
 
-                    <!-- TAB 5: Whitelist Control -->
+                    <!-- TAB 5: Archived Students -->
+                    <div class="teacher-tab-content" id="tab-teacher-archived">
+                        <div class="calc-card" style="margin-bottom: 1.5rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                                <h3><i class="fa-solid fa-box-archive"></i> Alumnos Archivados</h3>
+                                <p style="color: var(--text-secondary); font-size:0.9rem; margin:0;">Los registros académicos de estos alumnos se conservan intactos en la base de datos.</p>
+                            </div>
+                            <div class="custom-table-container" style="margin-top:1rem;">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre Completo</th>
+                                            <th>Correo Electrónico</th>
+                                            <th>Cédula / Carnet</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-archived-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: Whitelist Control -->
                     <div class="teacher-tab-content" id="tab-teacher-whitelist">
                         <div class="calc-card" style="margin-bottom:1.5rem;">
                             <h3><i class="fa-solid fa-user-check"></i> Agregar Correos Autorizados (Lista Blanca)</h3>
