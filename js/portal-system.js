@@ -228,7 +228,7 @@ function processAuthenticatedGoogleUser(user) {
                 // If delete fails (e.g. token expired), sign out as fallback
                 auth.signOut();
             });
-        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no está en la Lista Blanca de alumnos autorizados para este curso.\n\nTu cuenta ha sido eliminada del sistema. Contacta al profesor para solicitar acceso.`);
+        alert(`Su correo electrónico no está autorizado para participar en este curso.`);
         return;
     }
 
