@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initAppTheme();
     renderSidebarModules();
+    initSidebarToggle();
     initAppRouting();
     initGlobalSearch();
     initCLICheatsheet();
@@ -105,18 +106,6 @@ function renderSidebarModules() {
         groupEl.appendChild(topicsListEl);
         container.appendChild(groupEl);
     });
-
-    // Mobile sidebar handlers
-    const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
-    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-    const sidebar = document.getElementById('sidebar');
-
-    if (toggleSidebarBtn && sidebar) {
-        toggleSidebarBtn.addEventListener('click', () => sidebar.classList.add('open'));
-    }
-    if (closeSidebarBtn && sidebar) {
-        closeSidebarBtn.addEventListener('click', () => sidebar.classList.remove('open'));
-    }
 }
 
 /* ==========================================================================
@@ -161,7 +150,11 @@ function windowAppNav(toolName) {
 function handleHashChange() {
     const hash = window.location.hash || '#topic/m1-osi-tcpip';
     const sidebar = document.getElementById('sidebar');
-    if (sidebar) sidebar.classList.remove('open');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar && window.innerWidth <= 992) {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+    }
 
     // Hide all view sections
     document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
@@ -495,4 +488,76 @@ function initCLICheatsheet() {
     }
 
     renderCommands();
+}
+
+/* ==========================================================================
+   SIDEBAR TOGGLE & COLLAPSE CONTROLLER
+   ========================================================================== */
+function initSidebarToggle() {
+    const toggleBtn = document.getElementById('toggle-sidebar-btn');
+    const closeBtn = document.getElementById('close-sidebar-btn');
+    const sidebar = document.getElementById('sidebar');
+    const mainWrapper = document.querySelector('.main-wrapper');
+
+    let overlay = document.getElementById('sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sidebar-overlay';
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    function toggleSidebar() {
+        if (!sidebar) return;
+        const isMobile = window.innerWidth <= 992;
+        if (isMobile) {
+            const isOpen = sidebar.classList.contains('open');
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+        } else {
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            if (isCollapsed) {
+                sidebar.classList.remove('collapsed');
+                if (mainWrapper) mainWrapper.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.add('collapsed');
+                if (mainWrapper) mainWrapper.classList.add('sidebar-collapsed');
+            }
+        }
+    }
+
+    function closeSidebar() {
+        if (!sidebar) return;
+        const isMobile = window.innerWidth <= 992;
+        if (isMobile) {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        } else {
+            sidebar.classList.add('collapsed');
+            if (mainWrapper) mainWrapper.classList.add('sidebar-collapsed');
+        }
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleSidebar();
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeSidebar();
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
 }
