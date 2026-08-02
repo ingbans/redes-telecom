@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PORTAL SYSTEM: FIREBASE AUTHENTICATION, FIRESTORE DATABASE & SYNC ENGINE
+   PORTAL SYSTEM: FIREBASE AUTH, FIRESTORE & WHITELIST SECURITY ENGINE
    ========================================================================== */
 
 // Firebase Configuration Keys
@@ -20,6 +20,7 @@ const PORTAL_KEYS = {
     ATTENDANCE: 'net_portal_attendance',
     GRADES: 'net_portal_grades',
     QUIZZES: 'net_portal_quizzes',
+    WHITELIST: 'net_portal_whitelist',
     SESSION: 'net_portal_session',
     TEACHER_PIN: 'net_portal_teacher_pin'
 };
@@ -35,6 +36,7 @@ let classCalendar = JSON.parse(localStorage.getItem(PORTAL_KEYS.CALENDAR) || '{}
 let attendanceRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.ATTENDANCE) || '{}');
 let gradesRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.GRADES) || '{}');
 let quizAttemptsRecords = JSON.parse(localStorage.getItem(PORTAL_KEYS.QUIZZES) || '{}');
+let whitelistEmails = JSON.parse(localStorage.getItem(PORTAL_KEYS.WHITELIST) || '[]');
 
 function initPortalSystem() {
     initFirebaseService();
@@ -70,6 +72,15 @@ function setupFirestoreRealtimeSync() {
             localStorage.setItem(PORTAL_KEYS.CALENDAR, JSON.stringify(classCalendar));
             if (window.location.hash === '#portal-teacher') renderCalendarConfigTab();
             if (window.location.hash === '#portal-student') renderStudentPortal();
+        }
+    });
+
+    // Realtime Whitelist Sync
+    db.collection('config').doc('whitelist').onSnapshot(doc => {
+        if (doc.exists) {
+            whitelistEmails = doc.data().emails || [];
+            localStorage.setItem(PORTAL_KEYS.WHITELIST, JSON.stringify(whitelistEmails));
+            if (window.location.hash === '#portal-teacher') renderWhitelistTab();
         }
     });
 
@@ -114,6 +125,13 @@ function setupFirestoreRealtimeSync() {
     });
 }
 
+function isEmailWhitelisted(email) {
+    if (!email) return false;
+    const cleanEmail = email.toLowerCase().trim();
+    if (whitelistEmails.length === 0) return true; // Whitelist inactive until professor adds first email
+    return whitelistEmails.includes(cleanEmail);
+}
+
 function ensureDefaultCalendar() {
     if (Object.keys(classCalendar).length === 0) {
         const today = new Date();
@@ -133,6 +151,13 @@ function saveCalendarData() {
     }
 }
 
+function saveWhitelistData() {
+    localStorage.setItem(PORTAL_KEYS.WHITELIST, JSON.stringify(whitelistEmails));
+    if (db) {
+        db.collection('config').doc('whitelist').set({ emails: whitelistEmails }).catch(console.error);
+    }
+}
+
 /* ==========================================================================
    GOOGLE AUTHENTICATION & SESSION MANAGEMENT
    ========================================================================== */
@@ -146,14 +171,22 @@ function handleGoogleSignIn() {
     auth.signInWithPopup(provider)
         .then((result) => {
             const user = result.user;
-            let existingStudent = registeredStudents.find(s => s.email === user.email.toLowerCase());
+            const email = user.email.toLowerCase().trim();
+
+            // Check Whitelist Security
+            if (!isEmailWhitelisted(email)) {
+                alert(`🛑 ACCESO DENEGADO: Tu correo de Google (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
+                auth.signOut();
+                return;
+            }
+
+            let existingStudent = registeredStudents.find(s => s.email === email);
 
             if (!existingStudent) {
-                // Auto create student profile from Google User
                 existingStudent = {
                     id: user.uid,
                     name: user.displayName || 'Estudiante Google',
-                    email: user.email.toLowerCase(),
+                    email: email,
                     idNumber: 'Google Account',
                     authProvider: 'google'
                 };
@@ -234,7 +267,6 @@ function handleLogout() {
    MODAL & FORM HANDLERS
    ========================================================================== */
 function initPortalModals() {
-    // Modal Register
     const registerForm = document.getElementById('student-register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -248,7 +280,6 @@ function initPortalModals() {
         });
     }
 
-    // Modal Login
     const loginForm = document.getElementById('portal-login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -258,7 +289,6 @@ function initPortalModals() {
         });
     }
 
-    // Full Page Login
     const pageLoginForm = document.getElementById('page-login-form');
     if (pageLoginForm) {
         pageLoginForm.addEventListener('submit', (e) => {
@@ -268,7 +298,6 @@ function initPortalModals() {
         });
     }
 
-    // Full Page Register
     const pageRegisterForm = document.getElementById('page-register-form');
     if (pageRegisterForm) {
         pageRegisterForm.addEventListener('submit', (e) => {
@@ -281,9 +310,24 @@ function initPortalModals() {
             performStudentRegistration(name, email, idNumber, password);
         });
     }
+
+    const addWhitelistForm = document.getElementById('add-whitelist-form');
+    if (addWhitelistForm) {
+        addWhitelistForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const inputVal = document.getElementById('whitelist-input-emails').value;
+            addEmailsToWhitelist(inputVal);
+            document.getElementById('whitelist-input-emails').value = '';
+        });
+    }
 }
 
 function performStudentRegistration(name, email, idNumber, password) {
+    if (!isEmailWhitelisted(email)) {
+        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
+        return;
+    }
+
     if (registeredStudents.some(s => s.email === email || s.idNumber === idNumber)) {
         alert('Ya existe un estudiante registrado con este correo o número de Cédula/Carnet.');
         return;
@@ -333,6 +377,11 @@ function performUserLogin(role, sourcePrefix) {
         const email = document.getElementById(sourcePrefix === 'modal' ? 'login-email' : 'page-login-email').value.trim().toLowerCase();
         const password = document.getElementById(sourcePrefix === 'modal' ? 'login-password' : 'page-login-password').value;
 
+        if (!isEmailWhitelisted(email)) {
+            alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor.`);
+            return;
+        }
+
         const student = registeredStudents.find(s => s.email === email && s.password === password);
         if (student) {
             currentSession = { role: 'student', user: student };
@@ -379,6 +428,70 @@ function openRegisterModal() {
 
 function closePortalModals() {
     document.getElementById('portal-modal-overlay').classList.add('hidden');
+}
+
+/* ==========================================================================
+   WHITELIST CONTROL FUNCTIONS (TEACHER)
+   ========================================================================== */
+function addEmailsToWhitelist(inputString) {
+    if (!inputString || !inputString.trim()) return;
+
+    const rawList = inputString.split(/[\n,]+/);
+    let addedCount = 0;
+
+    rawList.forEach(rawEmail => {
+        const clean = rawEmail.trim().toLowerCase();
+        if (clean && clean.includes('@') && !whitelistEmails.includes(clean)) {
+            whitelistEmails.push(clean);
+            addedCount++;
+        }
+    });
+
+    if (addedCount > 0) {
+        saveWhitelistData();
+        renderWhitelistTab();
+        alert(`¡Se han añadido ${addedCount} correo(s) a la Lista Blanca con éxito!`);
+    } else {
+        alert("Los correos ingresados ya estaban en la lista o no tenían un formato válido.");
+    }
+}
+
+function removeEmailFromWhitelist(emailToRemove) {
+    if (confirm(`¿Estás seguro de remover ${emailToRemove} de la Lista Blanca?`)) {
+        whitelistEmails = whitelistEmails.filter(e => e !== emailToRemove);
+        saveWhitelistData();
+        renderWhitelistTab();
+    }
+}
+
+function renderWhitelistTab() {
+    const tbody = document.getElementById('teacher-whitelist-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    if (whitelistEmails.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay restricciones aún. La Lista Blanca está vacía (Cualquier estudiante puede registrarse). Agrega correos arriba para activar la restricción.</td></tr>`;
+        return;
+    }
+
+    whitelistEmails.forEach(email => {
+        const isRegistered = registeredStudents.some(s => s.email === email);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${email}</strong></td>
+            <td>
+                ${isRegistered 
+                    ? '<span class="status-pill status-present"><i class="fa-solid fa-user-check"></i> Registrado</span>' 
+                    : '<span class="status-pill status-pending"><i class="fa-solid fa-clock"></i> Pendiente</span>'}
+            </td>
+            <td>
+                <button class="btn btn-secondary btn-sm" onclick="removeEmailFromWhitelist('${email}')">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 /* ==========================================================================
@@ -511,6 +624,7 @@ function renderTeacherPanel() {
     renderAttendanceTab();
     renderGradesTab();
     renderRosterTab();
+    renderWhitelistTab();
 }
 
 function renderCalendarConfigTab() {
@@ -717,6 +831,7 @@ function deleteStudent(studentId) {
 function exportPortalDataJSON() {
     const exportObj = {
         calendar: classCalendar,
+        whitelist: whitelistEmails,
         students: registeredStudents,
         attendance: attendanceRecords,
         grades: gradesRecords,

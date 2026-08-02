@@ -523,6 +523,7 @@
                         <button class="teacher-tab-btn" data-tab="tab-teacher-attendance"><i class="fa-solid fa-clipboard-user"></i> 2. Tomar Asistencias</button>
                         <button class="teacher-tab-btn" data-tab="tab-teacher-grades"><i class="fa-solid fa-pen-to-square"></i> 3. Cargar Calificaciones</button>
                         <button class="teacher-tab-btn" data-tab="tab-teacher-roster"><i class="fa-solid fa-users-gear"></i> 4. Nómina de Alumnos & Respaldos</button>
+                        <button class="teacher-tab-btn" data-tab="tab-teacher-whitelist"><i class="fa-solid fa-user-shield"></i> 5. Lista Blanca de Correos</button>
                     </div>
 
                     <!-- TAB 1: Calendar Config -->
@@ -612,6 +613,32 @@
                                         </tr>
                                     </thead>
                                     <tbody id="teacher-roster-tbody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <!-- TAB 5: Whitelist Control -->
+                    <div class="teacher-tab-content" id="tab-teacher-whitelist">
+                        <div class="calc-card" style="margin-bottom:1.5rem;">
+                            <h3><i class="fa-solid fa-user-check"></i> Agregar Correos Autorizados (Lista Blanca)</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Solo los correos listados aquí podrán registrarse e iniciar sesión. Puedes agregar varios correos separados por comas o saltos de línea:</p>
+                            
+                            <form id="add-whitelist-form" style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+                                <input type="text" id="whitelist-input-emails" placeholder="ejemplo1@unefa.edu.ve, estudiante2@gmail.com" style="flex:1; min-width:280px; padding:0.6rem 1rem; background-color:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:10px; color:var(--text-primary);">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Autorizar Correo(s)</button>
+                            </form>
+
+                            <div class="custom-table-container">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Correo Electrónico Autorizado</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="teacher-whitelist-tbody">
                                         <!-- Populated dynamically -->
                                     </tbody>
                                 </table>
