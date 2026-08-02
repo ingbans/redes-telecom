@@ -671,12 +671,12 @@ function renderGradesTab() {
 
     tbody.innerHTML = '';
     if (registeredStudents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding:2rem; color:var(--text-muted)">No hay estudiantes registrados aún.</td></tr>`;
         return;
     }
 
     registeredStudents.forEach(std => {
-        const stdGrades = gradesRecords[std.id] || { ex1: '', ex2: '', ex3: '' };
+        const stdGrades = gradesRecords[std.id] || { ex1: '', ex2: '', ex3: '', lab: '' };
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -685,7 +685,9 @@ function renderGradesTab() {
             <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex1" value="${stdGrades.ex1}"></td>
             <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex2" value="${stdGrades.ex2}"></td>
             <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="ex3" value="${stdGrades.ex3}"></td>
+            <td><input type="number" min="0" max="20" placeholder="0-20" class="grade-input" data-student-id="${std.id}" data-exam="lab" value="${stdGrades.lab}"></td>
             <td><strong class="calculated-avg" id="avg_${std.id}">-</strong></td>
+            <td><span class="status-pill" id="status_${std.id}">-</span></td>
         `;
         tbody.appendChild(tr);
         updateLiveStudentAvg(std.id);
@@ -700,10 +702,10 @@ function renderGradesTab() {
             if (val !== '' && (val < 0 || val > 20)) {
                 alert('La calificación debe estar comprendida estrictamente entre 0 y 20 puntos.');
                 e.target.value = val > 20 ? 20 : 0;
-                val = e.target.value;
+                val = Number(e.target.value);
             }
 
-            if (!gradesRecords[stdId]) gradesRecords[stdId] = { ex1: '', ex2: '', ex3: '' };
+            if (!gradesRecords[stdId]) gradesRecords[stdId] = { ex1: '', ex2: '', ex3: '', lab: '' };
             gradesRecords[stdId][examKey] = val;
 
             localStorage.setItem(PORTAL_KEYS.GRADES, JSON.stringify(gradesRecords));
@@ -718,17 +720,43 @@ function renderGradesTab() {
 
 function updateLiveStudentAvg(studentId) {
     const g = gradesRecords[studentId] || {};
-    const vals = [g.ex1, g.ex2, g.ex3].filter(v => v !== '' && v !== null && v !== undefined);
+    const theoryVals = [g.ex1, g.ex2, g.ex3].filter(v => v !== '' && v !== null && v !== undefined);
     const avgEl = document.getElementById(`avg_${studentId}`);
+    const statusEl = document.getElementById(`status_${studentId}`);
     if (!avgEl) return;
 
-    if (vals.length > 0) {
-        const avg = (vals.reduce((a, b) => Number(a) + Number(b), 0) / vals.length).toFixed(1);
-        avgEl.textContent = `${avg} / 20 pts`;
+    if (theoryVals.length > 0) {
+        const avg = (theoryVals.reduce((a, b) => Number(a) + Number(b), 0) / theoryVals.length);
+        avgEl.textContent = `${avg.toFixed(1)} / 20`;
         avgEl.style.color = avg >= 10 ? 'var(--accent)' : 'var(--danger)';
+
+        // Only show final status if all 4 grades are entered
+        if (statusEl && theoryVals.length === 3 && g.lab !== '' && g.lab !== null && g.lab !== undefined) {
+            const labVal = Number(g.lab);
+            const theoryPass = avg >= 10;
+            const labPass = labVal >= 10;
+
+            if (theoryPass && labPass) {
+                statusEl.textContent = '✅ Aprobado';
+                statusEl.className = 'status-pill status-present';
+            } else if (theoryPass && !labPass) {
+                statusEl.textContent = '❌ Reprobado (Laboratorio)';
+                statusEl.className = 'status-pill status-absent';
+            } else if (!theoryPass && labPass) {
+                statusEl.textContent = '❌ Reprobado (Teoría)';
+                statusEl.className = 'status-pill status-absent';
+            } else {
+                statusEl.textContent = '❌ Reprobado (Teoría y Laboratorio)';
+                statusEl.className = 'status-pill status-absent';
+            }
+        } else if (statusEl) {
+            statusEl.textContent = 'Pendiente';
+            statusEl.className = 'status-pill status-pending';
+        }
     } else {
         avgEl.textContent = '-';
         avgEl.style.color = 'inherit';
+        if (statusEl) { statusEl.textContent = '-'; statusEl.className = 'status-pill'; }
     }
 }
 
