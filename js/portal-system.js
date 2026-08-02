@@ -158,6 +158,8 @@ function saveWhitelistData() {
     }
 }
 
+const TEACHER_EMAIL = "bryann25067@gmail.com";
+
 /* ==========================================================================
    GOOGLE AUTHENTICATION & SESSION MANAGEMENT
    ========================================================================== */
@@ -173,7 +175,18 @@ function handleGoogleSignIn() {
             const user = result.user;
             const email = user.email.toLowerCase().trim();
 
-            // Check Whitelist Security
+            // Check if teacher email
+            if (email === TEACHER_EMAIL) {
+                currentSession = { role: 'teacher', user: { name: 'Prof. Bryan Navas (Admin)', email: TEACHER_EMAIL } };
+                localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+                closePortalModals();
+                renderAuthUI();
+                alert("¡Bienvenido Profesor Bryan Navas! Acceso concedido al Panel de Administración.");
+                window.location.hash = '#portal-teacher';
+                return;
+            }
+
+            // Check Whitelist Security for Students
             if (!isEmailWhitelisted(email)) {
                 alert(`🛑 ACCESO DENEGADO: Tu correo de Google (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
                 auth.signOut();
@@ -284,8 +297,7 @@ function initPortalModals() {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const role = document.querySelector('input[name="login-role"]:checked').value;
-            performUserLogin(role, 'modal');
+            performUserLogin('modal');
         });
     }
 
@@ -293,8 +305,7 @@ function initPortalModals() {
     if (pageLoginForm) {
         pageLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const role = document.querySelector('input[name="page-login-role"]:checked').value;
-            performUserLogin(role, 'page');
+            performUserLogin('page');
         });
     }
 
@@ -359,39 +370,41 @@ function performStudentRegistration(name, email, idNumber, password) {
     window.location.hash = '#portal-student';
 }
 
-function performUserLogin(role, sourcePrefix) {
-    if (role === 'teacher') {
-        const pinInput = document.getElementById(sourcePrefix === 'modal' ? 'login-teacher-pin' : 'page-login-teacher-pin').value;
-        const savedPin = localStorage.getItem(PORTAL_KEYS.TEACHER_PIN) || DEFAULT_TEACHER_PIN;
+function performUserLogin(sourcePrefix) {
+    const emailInput = document.getElementById(sourcePrefix === 'modal' ? 'login-email' : 'page-login-email');
+    const passInput = document.getElementById(sourcePrefix === 'modal' ? 'login-password' : 'page-login-password');
 
-        if (pinInput === savedPin) {
-            currentSession = { role: 'teacher', user: { name: 'Profesor de Telecomunicaciones' } };
-            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-            closePortalModals();
-            renderAuthUI();
-            window.location.hash = '#portal-teacher';
-        } else {
-            alert('Clave de Profesor/Administrador incorrecta.');
-        }
+    if (!emailInput || !passInput) return;
+
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passInput.value;
+
+    // Check if Teacher Email
+    if (email === TEACHER_EMAIL) {
+        currentSession = { role: 'teacher', user: { name: 'Prof. Bryan Navas (Admin)', email: TEACHER_EMAIL } };
+        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+        closePortalModals();
+        renderAuthUI();
+        alert("¡Bienvenido Profesor Bryan Navas! Acceso concedido al Panel de Administración.");
+        window.location.hash = '#portal-teacher';
+        return;
+    }
+
+    // Student Login & Whitelist Check
+    if (!isEmailWhitelisted(email)) {
+        alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor para este semestre.`);
+        return;
+    }
+
+    const student = registeredStudents.find(s => s.email === email && s.password === password);
+    if (student) {
+        currentSession = { role: 'student', user: student };
+        localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
+        closePortalModals();
+        renderAuthUI();
+        window.location.hash = '#portal-student';
     } else {
-        const email = document.getElementById(sourcePrefix === 'modal' ? 'login-email' : 'page-login-email').value.trim().toLowerCase();
-        const password = document.getElementById(sourcePrefix === 'modal' ? 'login-password' : 'page-login-password').value;
-
-        if (!isEmailWhitelisted(email)) {
-            alert(`🛑 ACCESO DENEGADO: Tu correo (${email}) no se encuentra en la Lista Blanca de alumnos autorizados por el profesor.`);
-            return;
-        }
-
-        const student = registeredStudents.find(s => s.email === email && s.password === password);
-        if (student) {
-            currentSession = { role: 'student', user: student };
-            localStorage.setItem(PORTAL_KEYS.SESSION, JSON.stringify(currentSession));
-            closePortalModals();
-            renderAuthUI();
-            window.location.hash = '#portal-student';
-        } else {
-            alert('Correo o contraseña de estudiante incorrecta.');
-        }
+        alert('Correo o contraseña de estudiante incorrecta.');
     }
 }
 
